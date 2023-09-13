@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Blog Ninja | <%=title %></title>
+    <%- include('./partials/head.ejs') %>
+</head>
+<body>
+
+    <%- include('./partials/nav.ejs') %>
+    <div class="blogs content">
+        <h2><u>All Tasks</u></h2>
+        <table>
+            <tr>
+                <th><p style="font-size: 24px; color: #8b8b8b8b">&nbsp; &nbsp; &nbsp;</p></th>
+                <th><p style="font-size: 24px; color: #8b8b8b8b; padding-right: 180px;">Task name</p></th>
+                <th><p style="font-size: 24px; color: #8b8b8b8b">Tags</p></th>
+                <th><p style="font-size: 24px; color: #8b8b8b8b">Priority</p></th>
+                <th><p style="font-size: 24px; color: #8b8b8b8b">Story Point</p></th>
+                <th><p style="font-size: 24px; color: #8b8b8b8b">&nbsp;&nbsp;&nbsp;&nbsp;</p></th>
+            </tr>
+            <% if (blogs.length > 0) { %>
+                <% blogs.forEach(blog => { %>
+                    <tr>
+                        <td><a class="delete" data-doc="<%= blog._id %>"><i class="fas fa-trash-alt"></i></a></td>
+                        <td><a class="single" href="/blogs/<%= blog._id %>"><p style="font-family: Calibri, sans-serif; font-size: 20px; padding-left: 10px; margin: 5px 0;"><%= blog.tasknames %></p></a></td>
+                        <td>
+                            <p style="margin: 5px 0;">
+                                <% blog.tags.forEach(tag => { %>
+                                    <span class="checkdesign"><%= tag %></span><br>
+                                <% }) %>
+                            </p>
+                        </td>
+                        <td>
+                            <p style="margin: 5px 0;">
+                                <% if (blog.priority === "Urgent") { %>
+                                    <scan class="urgent"><%= blog.priority %></scan>
+                                <% } else if (blog.priority === "Important") { %>
+                                    <scan class="important"><%= blog.priority %></scan>
+                                <% } else if (blog.priority === "Medium") { %>
+                                    <scan class="medium"><%= blog.priority %></scan>
+                                <% } else { %>
+                                    <scan class="low"><%= blog.priority %></scan>
+                                <% } %>
+                            </p>
+                        </td>
+                        <td><p style="font-family: Calibri, sans-serif; font-size: 20px; margin: 5px 0;"><%= blog.storypoint %></p></td>
+                        <td><i class="fas fa-edit"></i></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td><p style="padding-left: 28px;">&nbsp;</p></td>
+                    <td><a>There are no tasks</a></td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            <% } %>
+                 
+            <tr>
+                <td>&nbsp;</td>
+                <td><a href="/blogs/create">+ New Task</a></td>
+            </tr>
+        </table>
+    </div>
+    <%- include('./partials/footer.ejs') %>
+    <script>
+        // this is used to delete
+        // we do a.delete because we have an id-a object with a class delete
+       // Select all elements with class 'delete'
+        const trashcans = document.querySelectorAll('a.delete');
+
+        // Add a click event listener to each 'delete' button
+        trashcans.forEach(trashcan => {
+            trashcan.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent the default behavior of the anchor tag
+                
+                const endpoint = `/blogs/${trashcan.dataset.doc}`;
+                
+                fetch(endpoint, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => window.location.href = data.redirect)
+                .catch(err => console.log(err));
+            });
+        });
+        
+    </script>
+
+
+</body>
+</html>

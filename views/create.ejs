@@ -1,0 +1,112 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  <div class="create-blog content">
+    <form id="myForm" action="/blogs" method="POST">
+
+      <label for="tasknames">Task Name:</label>
+      <input type="text" id="tasknames" name="tasknames" required>
+
+      <label for="stage">Stage:</label>
+      <div class="select-container">
+      <select id="stage" name="stage" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value ="">Select Stage</option>
+        <option class="select-box" value="Planning">Planning</option>
+        <option class="select-box" value="Developing">Developing</option>
+        <option class="select-box" value="Testing">Testing</option>
+        <option class="select-box" value="Integration">Integration</option>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="status">Status:</label>
+      <div class="select-container">
+      <select id="status" name="status" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value ="">Select Status</option>
+        <option class="select-box" value="Not Started">Not Started</option>
+        <option class="select-box" value="In-Progress">In-Progress</option>
+        <option class="select-box" value="Completed">Completed</option>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="member">Members:</label>
+      <div class="select-container">
+      <select id="member" name="member[]" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+          <option class="select-box" value ="">Select Member</option>
+          <option class="select-box" value="Myint Myat Thura">Myint Myat Thura</option>
+          <option class="select-box" value="Safrina">Safrina</option>
+          <option class="select-box" value="Samantha">Samantha</option>
+          <option class="select-box" value="Justin">Justin</option>
+          <option class="select-box" value="Fawaas">Fawaas</option>
+          <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="type">Type:</label>
+      <div class="select-container">
+      <select id="type" name="type" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value ="">Select Type</option>
+        <option class="select-box" value="Story">Story</option>
+        <option class="select-box" value="Bug">Bug</option>
+      </select>
+      </div>
+
+      <label for="tags" class="checkbox">Tags:</label>
+        <div class="checkbox-group">
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Front end"><p class="checkdesign">Front end</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Back end"><p class="checkdesign">Back end</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="API"><p class="checkdesign">API</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Database"><p class="checkdesign">Database</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Framework"><p class="checkdesign">Framework</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Testing"><p class="checkdesign">Testing</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UI"><p class="checkdesign">UI</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UX"><p class="checkdesign">UX</p></label>
+          <!-- Add more options as needed -->
+      </div>
+
+      <label for="priority">Priority:</label>
+      <div class="select-container">
+      <select id="priority" name="priority" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value ="">Select Priority</option>
+        <option class="urgent" value="Urgent">Urgent</option>
+        <option class="important" value="Important">Important</option>
+        <option class="medium" value="Medium">Medium</option>
+        <option class="low" value="Low">Low</option>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="storypoint">Story Point:</label>
+      <input type="number" id="storypoint" name="storypoint" required>
+
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" required></textarea>
+
+      <button>Submit</button>
+    </form>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Please select at least one checkbox.');
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+</script>
+
+</body>
+</html>

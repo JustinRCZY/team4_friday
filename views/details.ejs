@@ -1,0 +1,72 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  <div class="home-container1">
+    <div class="details content">
+      <div class="content">
+        <a class="delete" data-doc="<%= blog._id %>" style="left: 820px; top: 570px"><i class="fas fa-trash-alt"></i></a>
+        <br>
+        <p><span style="font-family: Arial, Helvetica, sans-serif; font-size: 48px;"><%= blog.tasknames %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px;">Stage</span><span style="padding-left: 100px;">:</span><span style="font-family: Calibri, sans-serif; font-size: 24px; padding-left: 100px;"><%= blog.stage %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px;">Status</span><span style="padding-left: 93px;">:</span><span style="font-family: Calibri, sans-serif; font-size: 24px; padding-left: 100px;"><%= blog.status %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px;">Member</span><span style="padding-left: 69px;">:</span><span style="font-family: Calibri, sans-serif; font-size: 24px; padding-left: 100px;"><%= blog.member %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px;">Type</span><span style="padding-left: 108px;">:</span><span style="font-family: Calibri, sans-serif; font-size: 24px; padding-left: 100px;"><%= blog.type %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px;">Tags</span><span style="padding-left: 112px;">:</span><span style="font-family: Calibri, sans-serif; font-size: 24px; padding-left: 100px;">                                <% blog.tags.forEach(tag => { %>
+          <span class="checkdesign"><%= tag %></span>
+      <% }) %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px;">Priority</span><span style="padding-left: 82px;">:</span><span style="font-family: Calibri, sans-serif; font-size: 24px; padding-left: 100px;"><% if (blog.priority === "Urgent") { %>
+          <scan class="urgent"><%= blog.priority %></scan>
+      <% } else if (blog.priority === "Important") { %>
+          <scan class="important"><%= blog.priority %></scan>
+      <% } else if (blog.priority === "Medium") { %>
+          <scan class="medium"><%= blog.priority %></scan>
+      <% } else { %>
+          <scan class="low"><%= blog.priority %></scan>
+      <% } %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px;">Story Point</span><span style="padding-left: 47px;">:</span><span style="font-family: Calibri, sans-serif; font-size: 24px; padding-left: 100px;"><%= blog.storypoint %></span></p>
+        <br>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 24px; border-top: 1px solid #777;">Description : &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span><br><br></p>
+        <p><span style="font-family: Calibri, sans-serif; font-size: 20px; word-wrap: break-word;"><%= blog.description %></span></p>
+        
+      </div>
+    </div>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    // this is used to delete
+    // we do a.delete because we have an id-a object with a class delete
+   // Select all elements with class 'delete'
+    const trashcans = document.querySelectorAll('a.delete');
+
+    // Add a click event listener to each 'delete' button
+    trashcans.forEach(trashcan => {
+        trashcan.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent the default behavior of the anchor tag
+            
+            const endpoint = `/blogs/${trashcan.dataset.doc}`;
+            
+            fetch(endpoint, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => window.location.href = data.redirect)
+            .catch(err => console.log(err));
+        });
+    });
+    
+</script>
+</body>
+</html>

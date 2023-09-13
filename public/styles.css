@@ -1,0 +1,266 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
+    body{
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+      font-family: 'Noto Serif', serif;
+      max-width: 1200px;
+    }
+    p, h1, h2, h3, a, ul{
+      margin: 0;
+      padding: 0;
+      text-decoration: none;
+      color: #222;
+    }
+
+    /* nav & footer styles */
+    nav{
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 60px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+      text-transform: uppercase;
+    }
+    nav ul{
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    nav li{
+      list-style-type: none;
+      margin-left: 20px;
+    }
+    nav h1{
+      font-size: 3em;
+    }
+    nav p, nav a{
+      color: #777;
+      font-weight: 300;
+    }
+    footer{
+      color: #777;
+      text-align: center;
+      margin: 80px auto 20px;
+    }
+    h2{
+      text-underline-offset: 5px;
+      font-size: large;
+      padding-left:60px;
+    }
+    h3{
+      text-transform: capitalize;
+      margin-bottom: 8px;
+    }
+    .content{
+      margin-left: 20px;
+    }
+
+    /* index styles */
+    .blogs a{
+      display: block;
+      margin: 10px 0;
+      color: #8b8b8b;
+    }
+    .blogs a:hover h3{
+      color: crimson;
+    }
+
+    /* details styles */
+    .details{
+      position: relative;
+    }
+    .delete{
+      position: relative;
+      top: 0;
+      right: 0;
+      border-radius: 50%;
+      padding: 0px;
+    }
+    .delete:hover{
+      cursor: pointer;
+      box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+    }
+
+    /* create styles */
+    .create-blog form{
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .create-blog input,
+    .create-blog textarea{
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 8px;
+    }
+    .create-blog label{
+      display: block;
+      margin-top: 24px;
+    }
+    textarea{
+      height: 120px;
+    }
+    .create-blog button{
+      margin-top: 20px;
+      background: crimson;
+      color: white;
+      padding: 6px;
+      border: 0;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+
+    table {
+      width: 1200px;
+      border-collapse: collapse;
+      border-top: 1px solid #bebebe; /* Add a top border */
+      border-bottom: 1px solid #bebebe; /* Add a bottom border */
+    }
+
+    th:nth-child(2),td:nth-child(2) {
+      text-align: left;
+    }
+
+    th,td {
+      margin: 3px 0;
+      border-top: 1px solid #bebebe; /* Add a top border */
+      border-bottom: 1px solid #bebebe; /* Add a bottom border */
+      border-right: 1px solid #bebebe;
+      text-align: center;
+    }
+    
+    th:first-child,
+    td:first-child {
+      border-bottom: 1px solid #bebebe;
+      border-right: none;
+    }
+    
+    th:last-child,
+    td:last-child {
+        border-right: none; /* Remove right border for th and td in the last column */
+        border-bottom: 1px solid #bebebe;
+    }
+
+    .home-container1 {
+      position: relative;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      flex: 0 0 auto;
+      width: 80%;
+      border: 1px solid rgba(120, 120, 120, 0.4);
+      height: 80%;
+      display: relative;
+      box-shadow: 0px 0px 15px 0px #525252;
+      align-items: center;
+      flex-direction: column;
+      background-color: var(--dl-color-gray-white);
+    }
+
+    .test {
+      border-right: 1px solid #222;
+    }
+
+    .select-container {
+      display: flex;
+      justify-content: left;
+      position: relative;
+      min-width: 100px;
+      height: 50px;
+    }
+
+    .select-box {
+      border: none;
+      appearance: none;
+      padding: 0 30px 0 15px;
+      width: 80%;
+      color: rgb(0, 0, 0);
+      background-color: rgb(245, 236, 255);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    select {
+      width: 200px; /* Set a width for the dropdown */
+      padding: 5px; /* Add padding for better appearance */
+    }
+
+    .urgent {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgb(255, 255, 255);
+      background-color: red;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    
+    .important {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgb(255, 255, 255);
+      background-color: orange;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .medium {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgb(255, 255, 255);
+      background-color: rgb(235, 235, 0);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .low {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgb(255, 255, 255);
+      background-color: green;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .checkbox-group {
+      display: inline-block;
+      flex-direction: row;
+      gap: 10px; /* Adjust the gap between checkboxes as needed */
+    }
+    
+    .checkbox-group label {
+        display: inline-block;
+        align-items: left;
+        margin-right:8%;
+    }
+
+    .checkdesign {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      max-width: 100px;
+      width: 80%;
+      color: rgb(0, 0, 0);
+      background-color: rgb(245, 236, 255);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .checkbox {
+      display: inline-block;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .checkbox__input {
+      display: none;
+    }
