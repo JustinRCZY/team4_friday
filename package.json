@@ -2,7 +2,7 @@
   "name": "nodepractice",
   "version": "1.0.0",
   "description": "",
-  "main": "file.js",
+  "main": "app.js",
   "engines": {
     "node": "14.x"
   },
