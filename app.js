@@ -7,12 +7,12 @@ const { identity } = require('lodash')
 //connect to mongoDB
 const dbURI = 'mongodb+srv://myin0010:fit2101efficiency@cluster0.pci6sal.mongodb.net/?retryWrites=true&w=majority'
 
-
+const port = process.env.PORT || 3000;
 
 // express app
 const app = express();
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(result => app.listen(3000))
+  .then(result => app.listen(port))
   .catch(err => console.log(err));
 
 
