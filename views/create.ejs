@@ -16,7 +16,7 @@
       class="select-box">
         <option class="select-box" value ="">Select Stage</option>
         <option class="select-box" value="Planning">Planning</option>
-        <option class="select-box" value="Developing">Developing</option>
+        <option class="select-box" value="Developing">Development</option>
         <option class="select-box" value="Testing">Testing</option>
         <option class="select-box" value="Integration">Integration</option>
         <!-- Add more options as needed -->
@@ -44,7 +44,7 @@
           <option class="select-box" value="Safrina">Safrina</option>
           <option class="select-box" value="Samantha">Samantha</option>
           <option class="select-box" value="Justin">Justin</option>
-          <option class="select-box" value="Fawaas">Fawaas</option>
+          <option class="select-box" value="Fawwaz">Fawwaz</option>
           <!-- Add more options as needed -->
       </select>
       </div>
@@ -53,7 +53,6 @@
       <div class="select-container">
       <select id="type" name="type" required onchange="this.className=this.options[this.selectedIndex].className" 
       class="select-box">
-        <option class="select-box" value ="">Select Type</option>
         <option class="select-box" value="Story">Story</option>
         <option class="select-box" value="Bug">Bug</option>
       </select>
@@ -61,14 +60,14 @@
 
       <label for="tags" class="checkbox">Tags:</label>
         <div class="checkbox-group">
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Front end"><p class="checkdesign">Front end</p></label>
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Back end"><p class="checkdesign">Back end</p></label>
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="API"><p class="checkdesign">API</p></label>
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Database"><p class="checkdesign">Database</p></label>
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Framework"><p class="checkdesign">Framework</p></label>
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Testing"><p class="checkdesign">Testing</p></label>
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UI"><p class="checkdesign">UI</p></label>
-          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UX"><p class="checkdesign">UX</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Front end"><p class="front">Front end</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Back end"><p class="back">Back end</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="API"><p class="API">API</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Database"><p class="database">Database</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Framework"><p class="framework">Framework</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Testing"><p class="testing">Testing</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UI"><p class="UI">UI</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UX"><p class="UX">UX</p></label>
           <!-- Add more options as needed -->
       </div>
 
@@ -86,7 +85,7 @@
       </div>
 
       <label for="storypoint">Story Point:</label>
-      <input type="number" id="storypoint" name="storypoint" required>
+      <input type="number" id="storypoint" name="storypoint" required min ="1" max ="10">
 
       <label for="description">Description:</label>
       <textarea id="description" name="description" required></textarea>
@@ -102,7 +101,7 @@
         const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
         
         if (checkboxes.length === 0) {
-            alert('Please select at least one checkbox.');
+            alert('Please select at least one task.');
             event.preventDefault(); // Prevent form submission
         }
     });

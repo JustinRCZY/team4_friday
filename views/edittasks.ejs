@@ -1,0 +1,217 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+<body>
+    <nav class="navbar">
+        <div class="site-title">
+            <a href="/"><h1>Edit Task</h1></a>
+        </div>
+        <ul>
+            <li>
+                <a href="#">Navigation Directory</a>
+                <ul>
+                    <li><a href="/scrumboard">Scrum Board</a></li>
+                    <li><a href="/blogs">Product Backlog</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+  <div class="create-blog content">
+    <form action="/edittask/<%= blog._id %>" method="POST">
+
+      <label for="tasknames">Task Name:</label>
+      <input type="text" id="tasknames" name="tasknames" value="<%= blog.tasknames %>" style="font-family: Arial, Helvetica, sans-serif; font-size: 48px;" required>
+
+      <label for="stage">Stage:</label>
+      <div class="select-container">
+      <select id="stage" name="stage" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value ="<%= blog.stage %>"><%= blog.stage %></option>
+        <% if (blog.stage != "Planning") { %>
+            <option class="select-box" value="Planning">Planning</option>
+        <% } %>
+        <% if (blog.stage != "Developing") { %>
+            <option class="select-box" value="Developing">Development</option>
+        <% } %>
+        <% if (blog.stage != "Testing") { %>
+            <option class="select-box" value="Testing">Testing</option>
+        <% } %>
+        <% if (blog.stage != "Integration") { %>
+            <option class="select-box" value="Integration">Integration</option>
+        <% } %>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="status">Status:</label>
+      <div class="select-container">
+      <select id="status" name="status" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value ="<%= blog.status %>"><%= blog.status %></option>
+        <% if (blog.status != "Not Started") { %>
+            <option class="select-box" value="Not Started">Not Started</option>
+        <% } %>
+        <% if (blog.status != "In-Progress") { %>
+            <option class="select-box" value="In-Progress">In-Progress</option>
+        <% } %>
+        <% if (blog.status != "Completed") { %>
+            <option class="select-box" value="Completed">Completed</option>
+        <% } %>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="member">Members:</label>
+      <div class="select-container">
+      <select id="member" name="member[]" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+          <option class="select-box" value ="<%= blog.member %>"><%= blog.member %></option>
+          <% if (blog.member != "Myint Myat Thura") { %>
+            <option class="select-box" value="Myint Myat Thura">Myint Myat Thura</option>
+          <% } %>
+          <% if (blog.member != "Myint Myat Thura") { %>
+            <option class="select-box" value="Safrina">Safrina</option>
+          <% } %>
+          <% if (blog.member != "Samantha") { %>
+            <option class="select-box" value="Samantha">Samantha</option>
+          <% } %>
+          <% if (blog.member != "Justin") { %>
+            <option class="select-box" value="Justin">Justin</option>
+          <% } %>
+          <% if (blog.member != "Fawwaz") { %>
+            <option class="select-box" value="Fawwaz">Fawwaz</option>
+          <% } %>
+          <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="type">Type:</label>
+      <div class="select-container">
+      <select id="type" name="type" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value ="<%= blog.type %>"><%= blog.type %></option>
+        <% if (blog.type != "Story") { %>
+            <option class="select-box" value="Story">Story</option>
+        <% } %>
+        <% if (blog.type != "Bug") { %>
+            <option class="select-box" value="Bug">Bug</option>
+        <% } %>
+      </select>
+      </div>
+
+      <label for="tags" class="checkbox">Tags:</label>
+        <div class="checkbox-group">
+            <% if (blog.tags.includes("Front end")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Front end" checked><p class="front" >Front end</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Front end"><p class="front" >Front end</p></label>
+            <% } %>
+            <% if (blog.tags.includes("Back end")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Back end" checked><p class="back" >Back end</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Back end"><p class="back" >Back end</p></label>
+            <% } %>
+            <% if (blog.tags.includes("API")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="API" checked><p class="API" >API</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="API"><p class="API" >API</p></label>
+            <% } %>
+            <% if (blog.tags.includes("Database")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Database" checked><p class="database" >Database</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Database"><p class="database" >Database</p></label>
+            <% } %>
+            <% if (blog.tags.includes("Framework")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Framework" checked><p class="framework" >Framework</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Framework"><p class="framework" >Framework</p></label>
+            <% } %>
+            <% if (blog.tags.includes("Testing")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Testing" checked><p class="testing" >Testing</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Testing"><p class="testing" >Testing</p></label>
+            <% } %>
+            <% if (blog.tags.includes("UI")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UI" checked><p class="UI" >UI</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UI"><p class="UI" >UI</p></label>
+            <% } %>
+            <% if (blog.tags.includes("UX")) { %>
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UX" checked><p class="UX" >UX</p></label>
+            <% }  else { %> 
+                <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UX"><p class="UX" >UX</p></label>
+            <% } %>
+          <!-- Add more options as needed -->
+      </div>
+
+      <label for="priority">Priority:</label>
+      <div class="select-container">
+        <% if (blog.priority == "Urgent") { %>
+            <select id="priority" name="priority" required onchange="this.className=this.options[this.selectedIndex].className" 
+            class="urgent">
+        <% } else if (blog.priority == "Important") { %>
+            <select id="priority" name="priority" required onchange="this.className=this.options[this.selectedIndex].className" 
+            class="important">
+        <% } else if (blog.priority == "Medium") { %>
+            <select id="priority" name="priority" required onchange="this.className=this.options[this.selectedIndex].className" 
+            class="medium">
+        <% } else { %>
+            <select id="priority" name="priority" required onchange="this.className=this.options[this.selectedIndex].className" 
+            class="low">
+        <% } %>
+        <% if (blog.priority == "Urgent") { %>
+            <option class="urgent" value="Urgent">Urgent</option>
+        <% } else if (blog.priority == "Important") { %>
+            <option class="important" value="Important">Important</option>
+        <% } else if (blog.priority == "Medium") { %>
+            <option class="medium" value="Medium">Medium</option>
+        <% } else { %>
+            <option class="low" value="Low">Low</option>
+        <% } %>
+        <% if (blog.priority != "Urgent") { %>
+            <option class="urgent" value="Urgent">Urgent</option>
+        <% } %>
+        <% if (blog.priority != "Important") { %>
+            <option class="important" value="Important">Important</option>
+        <% } %>
+        <% if (blog.priority != "Medium") { %>
+            <option class="medium" value="Medium">Medium</option>
+        <% } %>
+        <% if (blog.priority != "Low") { %>
+            <option class="low" value="Low">Low</option>
+        <% } %>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="storypoint">Story Point:</label>
+      <% if (new Date() < sprint.startdate) { %>
+        <input type="number" id="storypoint" name="storypoint" required min ="1" max ="10" value = <%= blog.storypoint %>>
+      <% } else { %>
+        <label><%= blog.storypoint %></label>
+      <% } %> 
+
+
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" required><%= blog.description %></textarea>
+
+      <button>Save Changes</button>
+    </form>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Please select at least one checkbox.');
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+<body>
+  <nav class="navbar">
+    <div class="site-title">
+        <a href="/scrumboard"><h1>Scrum Board</h1></a>
+    </div>
+    <ul>
+        <li>
+            <a href="#">Navigation Directory</a>
+            <ul>
+                <li><a href="/scrumboard">Scrum Board</a></li>
+                <li><a href="/blogs">Product Backlog</a></li>
+            </ul>
+        </li>
+    </ul>
+  </nav>
+
+  <div class="create-blog content">
+    <form id="myForm" action="/scrumboard" method="POST">
+
+      <label for="sprintname">Sprint Name:</label>
+      <input type="text" id="sprintname" name="sprintname" required>
+
+      <label for="status">Status:</label>
+      <div class="select-container">
+      <select id="status" name="status" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <option class="select-box" value="Not Started">Not Started</option>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+
+      <label for="startdate">Dates:</label>
+      <div class="select-container">
+        <input type="date" name="startdate" max="" id="startdate" required> &nbsp;&nbsp;&nbsp;
+        <input type="date" name="enddate" min="" id="enddate" required>
+      </div>
+
+      <label for="tasks">Tasks:</label>
+      <div class="checkbox-group">
+        <% blogTasks.forEach(task => { %>
+          <% if (task.visibility) { %>
+            <label><input class="checkbox__input" type="checkbox" name="tasks[]" value="<%= task._id %>"><p class="checkdesign"><%= task.tasknames %></p></label>
+          <% } %>
+        <% }); %>
+      </div>
+      <br>
+      <button>Submit</button>
+    </form>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    });
+  </script>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Please select at least one task.');
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+  </script>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var currentDate = new Date().toISOString().split('T')[0];
+  
+      // Set the minimum date for startdate to the current date
+      $('#startdate').prop('min', currentDate);
+  
+      var startdate;
+      $('#startdate').on('change', function() {
+        startdate = $(this).val();
+        $('#enddate').prop('min', function() {
+          return startdate;
+        });
+      });
+  
+      var enddate;
+      $('#enddate').on('change', function() {
+        enddate = $(this).val();
+        $('#startdate').prop('max', function() {
+          return enddate;
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

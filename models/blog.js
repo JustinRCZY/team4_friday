@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+
 // creates an object with type string and set required to true
 const blogSchema = new Schema({
     tasknames: {
@@ -38,11 +39,21 @@ const blogSchema = new Schema({
     description:{
         type:String,
         required: true
+    },
+    visibility:{
+        type:Boolean,
+        default: true
+    },
+    hours:{
+        type:[[],[],[],[],[],[]],
+        required:false
     }
 }, {timestamps: true})
+
+
+
 
 // this is a constructor for the above, we must use tasks which is the name in our mongoAtlas database
 const Blog = mongoose.model('Tasks',blogSchema)
 
 module.exports = Blog;
-

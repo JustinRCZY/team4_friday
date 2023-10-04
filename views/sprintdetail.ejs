@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>StreamlinePro | <%=title %></title>
+    <%- include('./partials/head.ejs') %>
+</head>
+<body>
+
+    <nav class="navbar">
+      <div class="site-title">
+          <a href="/scrumboard"><h1>Sprint Backlog - <%= sprint.sprintname %></h1></a>
+      </div>
+    <ul>
+      <li>
+        <a href="#">Navigation Directory</a>
+        <ul>
+          <li><a href="/scrumboard">Scrum Board</a></li>
+          <li><a href="/blogs">Product Backlog</a></li>
+        </ul>
+      </li>
+    </ul>
+    </nav>
+
+    <div class="blogs content">
+        <h2><u>Not Started</u></h2>
+        <table>
+            <tr>
+                <th><p style="font-size: 24px; color: #0000008b">&nbsp; &nbsp; &nbsp;</p></th>
+                <th><p style="font-size: 24px; color: #0000008b; padding-right: 180px;">Task name</p></th>
+                <th><p style="font-size: 24px; color: #0000008b">Tags</p></th>
+                <th><p style="font-size: 24px; color: #0000008b">Priority</p></th>
+                <th><p style="font-size: 24px; color: #0000008b">Story Point</p></th>
+                <th><p style="font-size: 24px; color: #0000008b">&nbsp;&nbsp;&nbsp;&nbsp;</p></th>
+            </tr>
+            <% if (tasks.length > 0) { %>
+                <% tasks.forEach(task => { %>
+                  <% if (task.status == "Not Started") { %>
+                    <tr>
+                        <td><a class="delete" data-doc="<%= task._id %>"><i class="fas fa-trash-alt"></i></a></td>
+                        <td><a class="single" href="/scrumboard/task/<%= task._id %>"><p style="font-family: Calibri, sans-serif; font-size: 20px; padding-left: 10px; margin: 5px 0;"><%= task.tasknames %></p></a></td>
+                        <td>
+                            <p style="margin: 5px 0;">
+                                <% task.tags.forEach(tag => { %>
+
+                                    <% if (tag == "Front end") { %>
+                                        <scan class="front"><%= tag %></scan><br>
+                                    <% } else if (tag == "Back end") { %>
+                                        <scan class="back"><%= tag %></scan><br>
+                                    <% } else if (tag == "API") { %>
+                                        <scan class="API"><%= tag %></scan>&nbsp;
+                                    <% } else if (tag == "Database") { %>
+                                        <scan class="database"><%= tag %></scan><br>
+                                    <% } else if (tag == "Framework") { %>
+                                        <scan class="framework"><%= tag %></scan><br>
+                                    <% } else if (tag == "Testing") { %>
+                                        <scan class="testing"><%= tag %></scan>
+                                    <% } else if (tag == "UI") { %>
+                                        <scan class="UI"><%= tag %></scan>&nbsp;
+                                    <% } else { %>
+                                        <scan class="UX"><%= tag %></scan>&nbsp;
+                                    <% } %>
+                                    
+                                <% }) %>
+                            </p>
+                        </td>
+                        <td>
+                            <p style="margin: 5px 0;">
+                                <% if (task.priority === "Urgent") { %>
+                                    <scan class="urgent"><%= task.priority %></scan>
+                                <% } else if (task.priority === "Important") { %>
+                                    <scan class="important"><%= task.priority %></scan>
+                                <% } else if (task.priority === "Medium") { %>
+                                    <scan class="medium"><%= task.priority %></scan>
+                                <% } else { %>
+                                    <scan class="low"><%= task.priority %></scan>
+                                <% } %>
+                            </p>
+                        </td>
+                        <td><p style="font-family: Calibri, sans-serif; font-size: 20px; margin: 5px 0;"><%= task.storypoint %></p></td>
+                        <td>
+                            <a class="single" href="/accumulation/<%= task._id %>"><i class="fas fa-chart-bar"></i></a>
+                            <% if (new Date() < sprint.enddate ) { %>
+                                <a class="single" href="/edittask/<%= task._id %>"><i class="fas fa-edit"></i></a>
+                                <a class="single" href="/logging/<%= task._id %>"><i class="fas fa-male"></i></a>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% } %>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td><p style="padding-left: 28px;">&nbsp;</p></td>
+                    <td><a>There are no tasks</a></td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            <% } %>
+        </table>
+
+        <br><br>
+
+        <h2><u>In-Progress</u></h2>
+        <table>
+          <tr>
+              <th><p style="font-size: 24px; color: #0000008b">&nbsp; &nbsp; &nbsp;</p></th>
+              <th><p style="font-size: 24px; color: #0000008b; padding-right: 180px;">Task name</p></th>
+              <th><p style="font-size: 24px; color: #0000008b">Tags</p></th>
+              <th><p style="font-size: 24px; color: #0000008b">Priority</p></th>
+              <th><p style="font-size: 24px; color: #0000008b">Story Point</p></th>
+              <th><p style="font-size: 24px; color: #0000008b">&nbsp;&nbsp;&nbsp;&nbsp;</p></th>
+          </tr>
+          <% if (tasks.length > 0) { %>
+              <% tasks.forEach(task => { %>
+                <% if (task.status == "In-Progress") { %>
+                  <tr>
+                      <td><a class="delete" data-doc="<%= task._id %>"><i class="fas fa-trash-alt"></i></a></td>
+                      <td><a class="single" href="/scrumboard/task/<%= task._id %>"><p style="font-family: Calibri, sans-serif; font-size: 20px; padding-left: 10px; margin: 5px 0;"><%= task.tasknames %></p></a></td>
+                      <td>
+                          <p style="margin: 5px 0;">
+                              <% task.tags.forEach(tag => { %>
+
+                                  <% if (tag == "Front end") { %>
+                                      <scan class="front"><%= tag %></scan><br>
+                                  <% } else if (tag == "Back end") { %>
+                                      <scan class="back"><%= tag %></scan><br>
+                                  <% } else if (tag == "API") { %>
+                                      <scan class="API"><%= tag %></scan>&nbsp;
+                                  <% } else if (tag == "Database") { %>
+                                      <scan class="database"><%= tag %></scan><br>
+                                  <% } else if (tag == "Framework") { %>
+                                      <scan class="framework"><%= tag %></scan><br>
+                                  <% } else if (tag == "Testing") { %>
+                                      <scan class="testing"><%= tag %></scan>
+                                  <% } else if (tag == "UI") { %>
+                                      <scan class="UI"><%= tag %></scan>&nbsp;
+                                  <% } else { %>
+                                      <scan class="UX"><%= tag %></scan>&nbsp;
+                                  <% } %>
+                                  
+                              <% }) %>
+                          </p>
+                      </td>
+                      <td>
+                          <p style="margin: 5px 0;">
+                              <% if (task.priority === "Urgent") { %>
+                                  <scan class="urgent"><%= task.priority %></scan>
+                              <% } else if (task.priority === "Important") { %>
+                                  <scan class="important"><%= task.priority %></scan>
+                              <% } else if (task.priority === "Medium") { %>
+                                  <scan class="medium"><%= task.priority %></scan>
+                              <% } else { %>
+                                  <scan class="low"><%= task.priority %></scan>
+                              <% } %>
+                          </p>
+                      </td>
+                      <td><p style="font-family: Calibri, sans-serif; font-size: 20px; margin: 5px 0;"><%= task.storypoint %></p></td>
+                      <td>
+                        <a class="single" href="/accumulation/<%= task._id %>"><i class="fas fa-chart-bar"></i></a>
+                        <% if (new Date() < sprint.enddate ) { %>
+                            <a class="single" href="/edittask/<%= task._id %>"><i class="fas fa-edit"></i></a>
+                            <a class="single" href="/logging/<%= task._id %>"><i class="fas fa-male"></i></a>
+                        <% } %>
+                    </td>
+                      </td>
+                  </tr>
+                  <% } %>
+              <% }) %>
+          <% } else { %>
+              <tr>
+                  <td><p style="padding-left: 28px;">&nbsp;</p></td>
+                  <td><a>There are no tasks</a></td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+              </tr>
+          <% } %>
+      </table>
+
+      <br><br>
+
+      <h2><u>Completed</u></h2>
+      <table>
+        <tr>
+            <th><p style="font-size: 24px; color: #0000008b">&nbsp; &nbsp; &nbsp;</p></th>
+            <th><p style="font-size: 24px; color: #0000008b; padding-right: 180px;">Task name</p></th>
+            <th><p style="font-size: 24px; color: #0000008b">Tags</p></th>
+            <th><p style="font-size: 24px; color: #0000008b">Priority</p></th>
+            <th><p style="font-size: 24px; color: #0000008b">Story Point</p></th>
+            <th><p style="font-size: 24px; color: #0000008b">&nbsp;&nbsp;&nbsp;&nbsp;</p></th>
+        </tr>
+        <% if (tasks.length > 0) { %>
+            <% tasks.forEach(task => { %>
+              <% if (task.status == "Completed") { %>
+                <tr>
+                    <td><a class="delete" data-doc="<%= task._id %>"><i class="fas fa-trash-alt"></i></a></td>
+                    <td><a class="single" href="/scrumboard/task/<%= task._id %>"><p style="font-family: Calibri, sans-serif; font-size: 20px; padding-left: 10px; margin: 5px 0;"><%= task.tasknames %></p></a></td>
+                    <td>
+                        <p style="margin: 5px 0;">
+                            <% task.tags.forEach(tag => { %>
+
+                                <% if (tag == "Front end") { %>
+                                    <scan class="front"><%= tag %></scan><br>
+                                <% } else if (tag == "Back end") { %>
+                                    <scan class="back"><%= tag %></scan><br>
+                                <% } else if (tag == "API") { %>
+                                    <scan class="API"><%= tag %></scan>&nbsp;
+                                <% } else if (tag == "Database") { %>
+                                    <scan class="database"><%= tag %></scan><br>
+                                <% } else if (tag == "Framework") { %>
+                                    <scan class="framework"><%= tag %></scan><br>
+                                <% } else if (tag == "Testing") { %>
+                                    <scan class="testing"><%= tag %></scan>
+                                <% } else if (tag == "UI") { %>
+                                    <scan class="UI"><%= tag %></scan>&nbsp;
+                                <% } else { %>
+                                    <scan class="UX"><%= tag %></scan>&nbsp;
+                                <% } %>
+                                
+                            <% }) %>
+                        </p>
+                    </td>
+                    <td>
+                        <p style="margin: 5px 0;">
+                            <% if (task.priority === "Urgent") { %>
+                                <scan class="urgent"><%= task.priority %></scan>
+                            <% } else if (task.priority === "Important") { %>
+                                <scan class="important"><%= task.priority %></scan>
+                            <% } else if (task.priority === "Medium") { %>
+                                <scan class="medium"><%= task.priority %></scan>
+                            <% } else { %>
+                                <scan class="low"><%= task.priority %></scan>
+                            <% } %>
+                        </p>
+                    </td>
+                    <td><p style="font-family: Calibri, sans-serif; font-size: 20px; margin: 5px 0;"><%= task.storypoint %></p></td>
+                    <td>
+                        <a class="single" href="/accumulation/<%= task._id %>"><i class="fas fa-chart-bar"></i></a>
+                        <% if (new Date() < sprint.enddate ) { %>
+                            <a class="single" href="/edittask/<%= task._id %>"><i class="fas fa-edit"></i></a>
+                            <a class="single" href="/logging/<%= task._id %>"><i class="fas fa-male"></i></a>
+                        <% } %>
+                    </td>
+                </tr>
+                <% } %>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td><p style="padding-left: 28px;">&nbsp;</p></td>
+                <td><a>There are no tasks</a></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+        <% } %>
+    </table>
+    </div>
+    <%- include('./partials/footer.ejs') %>
+    <script>
+        // this is used to delete
+        // we do a.delete because we have an id-a object with a class delete
+       // Select all elements with class 'delete'
+        const trashcans = document.querySelectorAll('a.delete');
+
+        // Add a click event listener to each 'delete' button
+        trashcans.forEach(trashcan => {
+            trashcan.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent the default behavior of the anchor tag
+                
+                const endpoint = `/blogs/${trashcan.dataset.doc}`;
+                
+                fetch(endpoint, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => window.location.href = data.redirect)
+                .catch(err => console.log(err));
+            });
+        });
+        
+    </script>
+
+
+</body>
+</html>

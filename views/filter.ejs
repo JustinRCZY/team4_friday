@@ -1,0 +1,52 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+<body>
+  <%- include("./partials/nav.ejs") %>
+
+  <div class="create-blog content">
+    <form id="myForm" action="/filteredindex" method="POST">
+
+      <div style="font-family: Arial, Helvetica, sans-serif; font-size: 36px;">Choose tags to filter:</div>
+
+        <div class="checkbox-group">
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Front end"><p class="front">Front end</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Back end"><p class="back">Back end</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="API"><p class="API">API</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Database"><p class="database">Database</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Framework"><p class="framework">Framework</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="Testing"><p class="testing">Testing</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UI"><p class="UI">UI</p></label>
+          <label><input class="checkbox__input" type="checkbox" name="tags[]" value="UX"><p class="UX">UX</p></label>
+          <!-- Add more options as needed -->
+      </div>
+      <input type="hidden" id="selectedTags" name="selectedTags" value="">
+
+      <button>Submit</button>
+      <button style="margin-top: 20px;background: red;color: white;padding: 6px;border: 0;font-size: 1.2em; cursor: pointer; margin-left: 20px;"><a href="/blogs" style="margin-top: 20px;background: red;color: white;padding: 6px;border: 0;font-size: 1em; cursor: pointer;">Clear</a></button>
+    </form>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+      const selectedTags = [...document.querySelectorAll('input[type="checkbox"]:checked')].map(checkbox => checkbox.value);
+      document.getElementById('selectedTags').value = selectedTags.join(','); // Convert the array to a comma-separated string
+    });
+  </script>
+
+<script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Please select at least one task.');
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+</script>
+  
+
+</body>
+</html>

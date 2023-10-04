@@ -1,0 +1,122 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+<body>
+  <nav class="navbar">
+    <div class="site-title">
+        <a href="/scrumboard"><h1>Edit Sprint</h1></a>
+    </div>
+    <ul>
+        <li>
+            <a href="#">Navigation Directory</a>
+            <ul>
+                <li><a href="/scrumboard">Scrum Board</a></li>
+                <li><a href="/blogs">Product Backlog</a></li>
+            </ul>
+        </li>
+    </ul>
+  </nav>
+
+  <div class="create-blog content">
+    <form id="myForm" action="/editsprint/<%= sprint._id %>" method="POST">
+
+      <label for="sprintname">Sprint Name:</label>
+      <input type="text" id="sprintname" name="sprintname" value="<%= sprint.sprintname %>" style="font-family: Arial, Helvetica, sans-serif; font-size: 48px;" required>
+
+      <label for="status">Status:</label>
+      <div class="select-container">
+      <select id="status" name="status" required onchange="this.className=this.options[this.selectedIndex].className" 
+      class="select-box">
+        <% if (new Date() > sprint.startdate & new Date() < sprint.enddate) { %>
+          <option class="select-box" value="In Progress">In-Progress</option>
+        <% } else if (new Date() < sprint.startdate) { %>
+          <option class="select-box" value="Not Started">Not Started</option>
+        <% } else { %>
+          <option class="select-box" value="Done">Completed</option>
+        <% } %>
+        <!-- Add more options as needed -->
+      </select>
+      </div>
+      <label for="startdate">Dates:</label>
+      <div class="select-container">
+        <input type="date" name="startdate" max="" id="startdate" required value="<%= sprint.startdate.toISOString().split('T')[0]%>"> &nbsp;&nbsp;&nbsp;
+        <input type="date" name="enddate" min="" id="enddate" required value="<%= sprint.enddate.toISOString().split('T')[0]%>">
+      </div>
+      <label for="tasks">Tasks:</label>
+      <div class="checkbox-group">
+        <% blogTasks.forEach(task => { %>
+          <% if (task.visibility ) { %>
+            <label><input class="checkbox__input" type="checkbox" name="tasks[]" value="<%= task._id %>" placeholder="<%= task %>"><p class="checkdesign"><%= task.tasknames %></p></label>
+          <% } else if (sprint.tasks.includes(task._id)) { %>
+            <label><input class="checkbox__input" type="checkbox" name="tasks[]" value="<%= task._id %>" placeholder="<%= task %>" checked><p class="checkdesign"><%= task.tasknames %></p></label>
+          <% } %>
+        <% }); %>
+      </div>
+      <br>
+      <button>Save Changes</button>
+    </form>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    });
+  </script>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var currentDate = new Date().toISOString().split('T')[0];
+  
+      // Set the minimum date for startdate to the current date
+      $('#startdate').prop('min', currentDate);
+  
+      var startdate;
+      $('#startdate').on('change', function() {
+        startdate = $(this).val();
+        $('#enddate').prop('min', function() {
+          return startdate;
+        });
+      });
+  
+      var enddate;
+      $('#enddate').on('change', function() {
+        enddate = $(this).val();
+        $('#startdate').prop('max', function() {
+          return enddate;
+        });
+      });
+    });
+  </script>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Please select at least one checkbox.');
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        if (this.checked) {
+          const placeholder = this.getAttribute('placeholder');
+          console.log(`Placeholder for checked task: ${placeholder}`);
+          // You can use the placeholder as needed, for example, update UI or perform other actions.
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

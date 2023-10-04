@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>StreamlinePro | <%=title %></title>
+    <%- include('./partials/head.ejs') %>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="site-title">
+            <a href="/scrumboard"><h1>Effort Chart - <%= task.tasknames %></h1></a>
+        </div>
+      <ul>
+        <li>
+          <a href="#">Navigation Directory</a>
+          <ul>
+            <li><a href="/scrumboard">Scrum Board</a></li>
+            <li><a href="/blogs">Product Backlog</a></li>
+          </ul>
+        </li>
+      </ul>
+      </nav>
+
+      <head>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      </head>
+      <body>
+      
+      <div style="width:80%;">
+        <canvas id="effortChart"></canvas>
+      </div>
+      
+      <div>
+        <label><input type="checkbox" id="line1Checkbox" checked> All members</label>
+        <label><input type="checkbox" id="line2Checkbox" checked> Myint Myat Thura</label>
+        <label><input type="checkbox" id="line3Checkbox" checked> Safrina</label>
+        <label><input type="checkbox" id="line4Checkbox" checked> Samantha</label>
+        <label><input type="checkbox" id="line5Checkbox" checked> Justin</label>
+        <label><input type="checkbox" id="line6Checkbox" checked> Fawwaz</label>
+      </div>
+      
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          // Sample data (replace with your actual data)
+          var days = Array.from({ length: <%= JSON.stringify(task.hours) %>[0].length }, (_, index) => index + 1);;
+          var line1Data = <%= JSON.stringify(task.hours) %>[5];
+          var line2Data = <%= JSON.stringify(task.hours) %>[0];
+          var line3Data = <%= JSON.stringify(task.hours) %>[1];
+          var line4Data = <%= JSON.stringify(task.hours) %>[2];
+          var line5Data = <%= JSON.stringify(task.hours) %>[3];
+          var line6Data = <%= JSON.stringify(task.hours) %>[4];
+      
+          var ctx = document.getElementById('effortChart').getContext('2d');
+      
+          var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: days,
+              datasets: [
+                {
+                  label: 'All members',
+                  data: line1Data,
+                  borderColor: 'rgba(1,1,1, 1)',
+                  hidden: false
+                },
+                {
+                  label: 'Myint Myat Thura',
+                  data: line2Data,
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  hidden: false
+                },
+                {
+                  label: 'Safrina',
+                  data: line3Data,
+                  borderColor: 'rgba(255, 206, 86, 1)',
+                  hidden: false
+                },
+                {
+                  label: 'Samantha',
+                  data: line4Data,
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  hidden: false
+                },
+                {
+                  label: 'Justin',
+                  data: line5Data,
+                  borderColor: 'rgba(200, 102, 255, 1)',
+                  hidden: false
+                },
+                {
+                  label: 'Fawwaz',
+                  data: line6Data,
+                  borderColor: 'rgba(255, 159, 64, 1)',
+                  hidden: false
+                }
+              ]
+            },
+            options: {
+              scales: {
+                x: {
+                  scaleLabel: {
+                  display: true,
+                  labelString: 'Days'
+                },
+                  type: 'linear',
+                  position: 'bottom'
+                },
+                y: {
+                  scaleLabel: {
+              display: true,
+              labelString: 'Hours'
+            },
+                  type: 'linear',
+                  position: 'left',
+                  suggestedMax: Math.max(...line1Data, ...line2Data, ...line3Data, ...line4Data, ...line5Data, ...line6Data) + 5
+                }
+              }
+            }
+          });
+      
+          // Checkbox event listeners
+          document.getElementById('line1Checkbox').addEventListener('change', function () {
+            chart.data.datasets[0].hidden = !this.checked;
+            chart.update();
+          });
+      
+          document.getElementById('line2Checkbox').addEventListener('change', function () {
+            chart.data.datasets[1].hidden = !this.checked;
+            chart.update();
+          });
+      
+          document.getElementById('line3Checkbox').addEventListener('change', function () {
+            chart.data.datasets[2].hidden = !this.checked;
+            chart.update();
+          });
+      
+          document.getElementById('line4Checkbox').addEventListener('change', function () {
+            chart.data.datasets[3].hidden = !this.checked;
+            chart.update();
+          });
+      
+          document.getElementById('line5Checkbox').addEventListener('change', function () {
+            chart.data.datasets[4].hidden = !this.checked;
+            chart.update();
+          });
+      
+          document.getElementById('line6Checkbox').addEventListener('change', function () {
+            chart.data.datasets[5].hidden = !this.checked;
+            chart.update();
+          });
+        });
+      </script>
+      
+      </body>
+      </html>

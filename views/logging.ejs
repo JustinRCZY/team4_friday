@@ -1,0 +1,80 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+<body>
+  <nav class="navbar">
+    <div class="site-title">
+        <a href="/scrumboard"><h1>Edit Sprint</h1></a>
+    </div>
+    <ul>
+        <li>
+            <a href="#">Navigation Directory</a>
+            <ul>
+                <li><a href="/scrumboard">Scrum Board</a></li>
+                <li><a href="/blogs">Product Backlog</a></li>
+            </ul>
+        </li>
+    </ul>
+  </nav>
+
+  <div class="create-blog content">
+    <form id="myForm" action="/logging/<%= task._id %>" method="POST">
+
+        <label for="tasknames">Task Name:</label>
+        <div style="font-family: Arial, Helvetica, sans-serif; font-size: 48px;"><%= task.tasknames %></div>
+
+        <label for="member">Members:</label>
+        <div class="select-container">
+        <select id="member" name="member" required onchange="this.className=this.options[this.selectedIndex].className" 
+        class="select-box">
+            <option class="select-box" value ="">Select Member</option>
+            <option class="select-box" value="0">Myint Myat Thura</option>
+            <option class="select-box" value="1">Safrina</option>
+            <option class="select-box" value="2">Samantha</option>
+            <option class="select-box" value="3">Justin</option>
+            <option class="select-box" value="4">Fawwaz</option>
+            <!-- Add more options as needed -->
+        </select>
+        </div>
+
+        <label for="startdate">Dates:</label>
+        <div class="select-container">
+            <input type="date" name="logdate" max="<%= sprint.enddate.toISOString().split('T')[0]%>" min="<%= sprint.startdate.toISOString().split('T')[0]%>" id="logdate" required> 
+        </div>
+
+        <label for="timelogged">Hours logged today</label>
+        <input type="number" id="storypoint" name="storypoint" required min ="1" max ="24">
+
+      <button>Save Changes</button>
+    </form>
+  </div>
+
+  <%- include("./partials/footer.ejs") %>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    });
+  </script>
+
+    <script>
+        document.getElementById('myForm').addEventListener('submit', function (event) {
+        // Make sure the 'member', 'logdate', etc matches up with the form
+        // names
+        const member = document.getElementById('member').value;
+        const logdate = document.getElementById('logdate').value;
+        const storypoint = document.getElementById('storypoint').value;
+    
+        // You can add validation here for member, logdate, and storypoint if needed
+    
+        // This code can be used to update the hidden input fields
+        document.getElementById('memberHidden').value = member;
+        document.getElementById('logdateHidden').value = logdate;
+        document.getElementById('storypointHidden').value = storypoint;
+        });
+    </script>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+</body>
+</html>
