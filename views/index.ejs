@@ -177,8 +177,22 @@ body {
   width: 4px;
 }
 @media screen and (max-width: 1024px) {
-  .sidebar {
-    display: none;
+  .sidebar:not(.show-sidebar) {
+    display: none; /* Hide the sidebar on small screens by default */
+  }
+}
+
+#toggleSidebarButton {
+  display: none; /* Initially hide the button */
+}
+
+@media screen and (max-width: 1024px) {
+  #toggleSidebarButton {
+    display: block; /* Show the button on screens below 768px */
+  }
+
+  .sidebar:not(.show-sidebar) {
+    display: none; /* Hide the sidebar on small screens by default */
   }
 }
 
@@ -815,7 +829,8 @@ body {
       </div>
     </div>
     <div class="app-content">
-      <div class="app-content-header">
+      <div class="app-content-header">&nbsp;
+        &nbsp;<button id="toggleSidebarButton" style="border: none;"><i class="fa-solid fa-bars"></i></button>&nbsp;&nbsp;
         <h1 class="app-content-headerText" style="font-size: 40px;">PRODUCT BACKLOG</h1>
         <button class="mode-switch" title="Colour Contrast Toggle">
           <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
@@ -927,6 +942,13 @@ body {
     </div>
     
   </div>
+
+  <script>
+    document.getElementById('toggleSidebarButton').addEventListener('click', function() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('show-sidebar');
+    });
+  </script>
 
     <script>
       if (<%= colorBlind %>) {

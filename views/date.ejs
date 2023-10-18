@@ -1122,11 +1122,14 @@ details summary::-webkit-details-marker {
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
+    var chartData = JSON.parse('<%- JSON.stringify(start).replace(/\\u0026/g, "&") %>');
+    var chartData2 = JSON.parse('<%- JSON.stringify(end).replace(/\\u0026/g, "&") %>');
     var currentDate = new Date().toISOString().split('T')[0];
-
     // Set the minimum date for startdate to the current date
-    $('#startdate').prop('min', currentDate);
-    $('#enddate').prop('min', currentDate);
+    $('#startdate').prop('min', new Date(chartData).toISOString().split('T')[0]);
+    $('#enddate').prop('min', new Date(chartData).toISOString().split('T')[0]);
+    $('#startdate').prop('max', new Date(chartData2).toISOString().split('T')[0]);
+    $('#enddate').prop('max', new Date(chartData2).toISOString().split('T')[0]);
 
     var startdate;
     $('#startdate').on('change', function() {

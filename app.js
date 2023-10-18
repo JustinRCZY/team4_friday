@@ -415,8 +415,42 @@ app.get('/filter', (req, res) => {
   res.render('filter', { title: 'About',currentuser:currentuser, admin:admin,alluser:alluser,colorBlind });
 });
 
-app.get('/datepage', (req, res) => {
-  res.render('date', { title: 'Date'});
+app.get('/datepage', async (req, res) => {
+  try {
+    currentSort = false;
+    sortByDate = true;
+
+    const [blogs, admin, members, currentUser, table, earliestSprint, latestSprint] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" }),
+      Tables.findOne(),
+      Sprints.find().sort('startdate').limit(1),
+      Sprints.find().sort('-enddate').limit(1)
+    ]);
+
+    // Extract dates and convert to JavaScript Date objects
+    const start = new Date(earliestSprint[0].startdate);
+    const end = new Date(latestSprint[0].enddate);
+    const startindex = 0;
+    const endindex = (end - start)/(1000 * 60 * 60 * 24)
+    console.log(startindex,endindex)
+
+    res.render('date', { 
+      blogs: blogs, 
+      admin: admin, 
+      members: members,
+      currentUser: currentUser,
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,colorBlind,table,start,end,startindex,endindex
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 
@@ -1364,6 +1398,42 @@ app.route('/editsprint/:id')
         Users.find({ admin: "false" }),
         Users.findOne({ currentuser: "true" })
       ]);
+
+      // Get the earliest sprint start date.
+    const earliestSprint = await Sprints.find().sort('startdate').limit(1);
+    const earliestStartDate = new Date(earliestSprint[0].startdate);
+    console.log(`Earliest Start Date: ${earliestStartDate}`); // ADD
+    // Get the latest sprint end date.
+    const latestSprint = await Sprints.find().sort('-enddate').limit(1);
+    const latestEndDate = new Date(latestSprint[0].enddate);
+    console.log(`Latest Start Date: ${latestEndDate}`); // ADD
+  
+    // Calculate the difference between these two dates.
+    const numberOfDaysToAdd = Math.ceil((latestEndDate - earliestStartDate) / (1000 * 60 * 60 * 24));
+    console.log(`Number of days to add: ${numberOfDaysToAdd}`); // ADD
+  
+    // Fetch the `Tables` object.
+    const tables = await Tables.findOne();
+  
+    if (tables && tables.array) {
+      for (let i = 0; i < tables.array.length; i++) {
+        let innerArray = tables.array[i];
+        const currentLength = innerArray.length;
+        console.log(`Inner Array Length: ${currentLength}`); // ADD
+  
+        if (numberOfDaysToAdd > currentLength) {
+          const numberOfZerosToAdd = numberOfDaysToAdd - currentLength;
+          
+          // Append zeros
+          for (let j = 0; j < numberOfZerosToAdd; j++) {
+            innerArray.push(0);
+          }
+        }
+      }
+  
+      // Save the modified `tables` object.
+      await tables.save();
+    }
   
       // Define the status order for sprints
       const statusOrderSprint = ['Not Started', 'In Progress', 'Completed'];
@@ -1395,80 +1465,180 @@ app.route('/editsprint/:id')
   });
 
 
-app.post('/scrumboard', async (req, res) => {
-  const taskIds = req.body.tasks; // Assuming taskIds is an array of Blog IDs
-
-  // Calculate the number of days between startdate and enddate
-  const startDate = new Date(req.body.startdate);
-  const endDate = new Date(req.body.enddate);
-  const numberOfDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-
-  // Create an array of zeros with a length equal to numberOfDays
-  const hoursArray = Array(numberOfDays).fill(0);
-
-  let totalStoryPoints = 0;
-
-// Loop through the taskIds and retrieve the story points for each task
-for (const taskId of taskIds) {
-  try {
-    const task = await Blog.findById(taskId);
-    if (task && (task.status === "Not Started" || task.status === "In Progress")) {
-      // Convert the storypoint to a number and add it to the total
-      totalStoryPoints += parseInt(task.storypoint, 10); // Assuming storypoint is a string containing a number
-    }
-  } catch (err) {
-    console.error('Error retrieving task:', err);
-  }
-}
-
-// console.log('Total Story Points:', totalStoryPoints);
-const nonAdminUserCount = await Users.find();
-// console.log("The number of users are");
-console.log(nonAdminUserCount.length);
-
-  // Create an array filled with the total sum of story points
-  const burndownArray = Array(numberOfDays).fill(totalStoryPoints);
-
-  // Loop through the taskIds and update the hours and burndown arrays of each Blog object
-  const updateTasks = taskIds.map(async taskId => {
-    try {
-      const task = await Blog.findById(taskId);
-      if (task) {
-        task.hours = Array((nonAdminUserCount.length)+1).fill([...hoursArray]); // Clone the hoursArray for each inner array
-        task.burndown = [...burndownArray]; // Clone the burndownArray
-        task.visibility = false;
-        return task.save();
+  app.post('/scrumboard', async (req, res) => {
+    const taskIds = req.body.tasks;
+  
+    // Calculate the number of days between startdate and enddate
+    const startDate = new Date(req.body.startdate);
+    const endDate = new Date(req.body.enddate);
+    const numberOfDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+  
+    // Create an array of zeros with a length equal to numberOfDays
+    const hoursArray = Array(numberOfDays).fill(0);
+  
+    let totalStoryPoints = 0;
+  
+    for (const taskId of taskIds) {
+      try {
+        const task = await Blog.findById(taskId);
+        if (task && (task.status === "Not Started" || task.status === "In Progress")) {
+          totalStoryPoints += parseInt(task.storypoint, 10);
+        }
+      } catch (err) {
+        console.error('Error retrieving task:', err);
       }
-    } catch (err) {
-      console.error('Error updating task:', err);
     }
+  
+    const nonAdminUserCount = await Users.find();
+    console.log(nonAdminUserCount.length);
+  
+    const burndownArray = Array(numberOfDays).fill(totalStoryPoints);
+  
+    const updateTasks = taskIds.map(async taskId => {
+      try {
+        const task = await Blog.findById(taskId);
+        if (task) {
+          task.hours = Array((nonAdminUserCount.length)+1).fill([...hoursArray]);
+          task.burndown = [...burndownArray];
+          task.visibility = false;
+          return task.save();
+        }
+      } catch (err) {
+        console.error('Error updating task:', err);
+      }
+    });
+  
+    Promise.all(updateTasks)
+      .then(async () => {
+        const sprints = new Sprints({
+          sprintname: req.body.sprintname,
+          tasks: taskIds,
+          status: req.body.status,
+          startdate: req.body.startdate,
+          enddate: req.body.enddate,
+          burndown: burndownArray,
+        });
+  
+        try {
+          const savedSprints = await sprints.save();
+          res.redirect('./scrumboard');
+        } catch (err) {
+          console.error('Error saving sprints:', err);
+        }
+      })
+      .catch(err => {
+        console.error('Error updating task visibility:', err);
+      });
+  
+    // New Feature Addition Starts Here
+  
+    
   });
 
-  // Wait for all tasks to be updated before creating the sprints object
-  Promise.all(updateTasks)
-    .then(async () => {
-      const sprints = new Sprints({
-        sprintname: req.body.sprintname,
-        tasks: taskIds, // Use the Blog IDs as they are
-        status: req.body.status,
-        startdate: req.body.startdate,
-        enddate: req.body.enddate,
-        burndown: burndownArray, // Clone the burndownArray
-      });
-
+  app.post('/scrumboard', async (req, res) => {
+    const taskIds = req.body.tasks;
+  
+    // Calculate the number of days between startdate and enddate
+    const startDate = new Date(req.body.startdate);
+    const endDate = new Date(req.body.enddate);
+    const numberOfDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+  
+    // Create an array of zeros with a length equal to numberOfDays
+    const hoursArray = Array(numberOfDays).fill(0);
+  
+    let totalStoryPoints = 0;
+  
+    for (const taskId of taskIds) {
       try {
-        const savedSprints = await sprints.save();
-        res.redirect('./scrumboard');
+        const task = await Blog.findById(taskId);
+        if (task && (task.status === "Not Started" || task.status === "In Progress")) {
+          totalStoryPoints += parseInt(task.storypoint, 10);
+        }
       } catch (err) {
-        console.error('Error saving sprints:', err);
-        // Handle error if needed
+        console.error('Error retrieving task:', err);
       }
-    })
-    .catch(err => {
-      console.error('Error updating task visibility:', err);
-      // Handle error if needed
+    }
+  
+    const nonAdminUserCount = await Users.find();
+    console.log(nonAdminUserCount.length);
+  
+    const burndownArray = Array(numberOfDays).fill(totalStoryPoints);
+  
+    const updateTasks = taskIds.map(async taskId => {
+      try {
+        const task = await Blog.findById(taskId);
+        if (task) {
+          task.hours = Array((nonAdminUserCount.length)+1).fill([...hoursArray]);
+          task.burndown = [...burndownArray];
+          task.visibility = false;
+          return task.save();
+        }
+      } catch (err) {
+        console.error('Error updating task:', err);
+      }
     });
-});
+  
+    Promise.all(updateTasks)
+      .then(async () => {
+        const sprints = new Sprints({
+          sprintname: req.body.sprintname,
+          tasks: taskIds,
+          status: req.body.status,
+          startdate: req.body.startdate,
+          enddate: req.body.enddate,
+          burndown: burndownArray,
+        });
+  
+        try {
+          const savedSprints = await sprints.save();
+          res.redirect('./scrumboard');
+        } catch (err) {
+          console.error('Error saving sprints:', err);
+        }
+      })
+      .catch(err => {
+        console.error('Error updating task visibility:', err);
+      });
+  
+    // New Feature Addition Starts Here
+  
+    // Get the earliest sprint start date.
+    const earliestSprint = await Sprints.find().sort('startdate').limit(1);
+    const earliestStartDate = new Date(earliestSprint[0].startdate);
+    console.log(`Earliest Start Date: ${earliestStartDate}`); // ADD
+  
+    // Get the latest sprint end date.
+    const latestSprint = await Sprints.find().sort('-enddate').limit(1);
+    const latestEndDate = new Date(latestSprint[0].enddate);
+    console.log(`Latest Start Date: ${latestEndDate}`); // ADD
+  
+    // Calculate the difference between these two dates.
+    const numberOfDaysToAdd = Math.ceil((latestEndDate - earliestStartDate) / (1000 * 60 * 60 * 24));
+    console.log(`Number of days to add: ${numberOfDaysToAdd}`); // ADD
+  
+    // Fetch the `Tables` object.
+    const tables = await Tables.findOne();
+  
+    if (tables && tables.array) {
+      for (let i = 0; i < tables.array.length; i++) {
+        let innerArray = tables.array[i];
+        const currentLength = innerArray.length;
+        console.log(`Inner Array Length: ${currentLength}`); // ADD
+  
+        if (numberOfDaysToAdd > currentLength) {
+          const numberOfZerosToAdd = numberOfDaysToAdd - currentLength;
+          
+          // Append zeros
+          for (let j = 0; j < numberOfZerosToAdd; j++) {
+            innerArray.push(0);
+          }
+        }
+      }
+  
+      // Save the modified `tables` object.
+      await tables.save();
+    }
+  });
 
 
 app.get('/sortsprint', async (req, res) => {
