@@ -811,6 +811,7 @@ body {
         </li>
         <% if (allsprints.length > 0) { %>
           <% allsprints.forEach(sprinter => { %>
+            <% if (sprint.sprintname != "hidden") { %>
             <% if ((sprinter._id + "") == (sprint._id + "")) { %>
               <li class="sidebar-list-item active">
               <% } else { %>
@@ -821,6 +822,7 @@ body {
               <span><%= sprinter.sprintname %></span>
           </a>
           </li>
+          <% } %>
       <% }) %>
       <% } %>
 

@@ -796,12 +796,14 @@ body {
         </li>
         <% if (sprints.length > 0) { %>
             <% sprints.forEach(sprint => { %>
+              <% if (sprint.sprintname != "hidden") { %>
             <li class="sidebar-list-item">
             <a href="/scrumboard/<%= sprint._id %>"> &nbsp;&nbsp;&nbsp;&nbsp;
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 <span><%= sprint.sprintname %></span>
             </a>
             </li>
+            <% } %>
         <% }) %>
         <% } %>
 
@@ -853,6 +855,7 @@ body {
         </div>
         <% if (sprints.length > 0) { %>
             <% sprints.forEach(sprint => { %>
+              <% if (sprint.sprintname != "hidden") { %>
         <div class="products-row">
           <button class="cell-more-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
@@ -881,6 +884,7 @@ body {
                 <a class="single" href="/burndown/<%= sprint._id %>"><i class="fas fa-chart-bar"></i></a>
             </div>
         </div>
+        <% } %>
         <% }) %>
         <% } else { %>
             <div class="products-row">
