@@ -3,6 +3,8 @@ const morgan = require('morgan')
 const mongoose = require('mongoose')
 const Blog = require('./models/blog')
 const Sprints = require('./models/sprints')
+const Tables = require('./models/table')
+const Users = require('./models/users')
 const bodyParser = require('body-parser'); 
 const { identity } = require('lodash')
 
@@ -27,6 +29,7 @@ app.use(express.static('public'));
 app.use(express.urlencoded({extended: true}))
 app.use(bodyParser.json());
 
+
 app.use(morgan('dev'));
 
 
@@ -34,6 +37,8 @@ app.use((req, res, next) => {
   res.locals.path = req.path;
   next();
 });
+
+
 
 // You can comment this or uncomment this block out, once u uncomment this,
 // whenever you run the app, it will add this sample data to the mongoDB. u can use
@@ -81,6 +86,31 @@ app.use((req, res, next) => {
 //   });
 
 
+const currentuser = Users.findOne({ currentuser: "true" });
+const alluser = Users.find();
+const admin = Users.findOne({ admin: "true" });
+const members = Users.find({ admin: "false" });
+
+
+let colorBlind = false 
+
+
+app.get('/colorblind', (req, res) => {
+  // Toggle the colorBlind value
+  colorBlind = !colorBlind;
+
+  // Redirect to the referring page or a default page if the referrer is not available
+  const referer = req.header('Referer');
+  if (referer) {
+      res.redirect(referer);
+  } else {
+      res.redirect('/'); // This redirects to the root of your application; change this if needed
+  }
+});
+
+
+
+
 // if we go to localhost:300/add-blog it automatically creates blogs
 // refer to models/blog.js
 app.get('/add-blog', (req, res) => {
@@ -99,6 +129,97 @@ app.get('/add-blog', (req, res) => {
 });
 
 
+app.get('/delete-table-reset', async (req, res) => {
+  try {
+    const user = await Tables.findOne();
+
+    if (!user) {
+      res.status(404).send("User not found");
+      return;
+    }
+
+    // Reset the 2D array property to an empty array
+    user.array = [];
+
+    // Save the changes
+    await user.save();
+
+    res.send("2D array reset successfully!");
+  } catch (error) {
+    console.error('Error resetting the 2D array:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+app.post('/newmember', async (req, res) => {
+  try {
+      // Capture username, email, and password from the form
+      const { username, email, password } = req.body;
+      console.log(req.body);
+
+      // Check if user with the same email already exists
+      const existingUser = await Users.findOne({ email });
+      if (existingUser) {
+          console.log("User with this email already exists.");
+          return res.render('newmember', { errorMessage: 'Email already in use.' });
+      }
+
+      // Create a new user with the provided username, email, and password
+      const newUser = new Users({
+          username,
+          email,
+          password
+          // Add other fields here if your User schema has more fields
+      });
+
+      await newUser.save();  // Save the new user to the database
+
+      console.log("New user created successfully!");
+
+      // Redirect to /members after the user has been successfully created
+      res.redirect('/members');
+  } catch (error) {
+      console.error('Error during user creation:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
+// POST request to handle login form submission
+app.post('/loginpage', async (req, res) => {
+  try {
+    // Capture email and password from the form
+    const { email, password } = req.body;
+    console.log(req.body);
+    console.log(email);
+    console.log(password);
+    // Find the user with the provided email and password
+    const user = await Users.findOne({ email, password });
+    
+    if (user) {
+      console.log("User is found");
+
+      // Set all users' currentuser property to false
+      await Users.updateMany({}, { currentuser: "false" });
+
+      // Now, set the currentuser property of this user to true
+      user.currentuser = "true";
+      await user.save();
+
+      // If a user is found, redirect to /blogs
+      res.redirect('/blogs');
+    } else {
+      console.log("User is not found");
+      // If no user is found, render the login page with an error message
+      res.render('loginpage', { errorMessage: 'Invalid email or password.' });
+    }
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+
 // when we go to all-blogs, we find everything and send the results
 // this isn't really necessary for our code
 app.get('/all-blogs', (req, res) => {
@@ -114,9 +235,10 @@ app.get('/all-blogs', (req, res) => {
 app.route('/test/:id')
   .get((req, res) => {
     const id = req.params.id;
+    
     Blog.findById(id)
       .then(result => {
-        res.render('edit', { blog: result, title: 'Edit Blog' });
+        res.render('edit', { blog: result, title: 'Edit Blog',colorBlind });
       })
       .catch(err => {
         console.log(err);
@@ -143,8 +265,11 @@ app.route('/test/:id')
 
       // Find the sprint that contains the current blog task
       const sprint = await Sprints.findOne({ tasks: id });
+      const currentuser = await Users.findOne({ currentuser: "true" });
+const alluser = await Users.find();
+const admin = await Users.find({ admin: false });
 
-      res.render('edittasks', { blog: result, sprint: sprint, title: 'Edit Blog' });
+      res.render('edittasks', { blog: result, sprint: sprint, title: 'Edit Blog', currentuser:currentuser,alluser:alluser,admin:admin,colorBlind });
     } catch (err) {
       console.error(err);
       res.status(500).send('Internal server error');
@@ -239,22 +364,126 @@ app.get('/single-blog', (req, res) => {
 
 
 
+
 // this is just a case where if localhost:3000/ , then we just send it to localhost:3000/blogs
 app.get('/', (req, res) => {
-  res.redirect('/scrumboard');
+  res.redirect('/loginpage');
 });
 
 
+app.get('/loginpage', (req, res) => {
+  res.render('loginpage', { title: 'About',colorBlind });
+});
+
+app.get('/addmember', (req, res) => {
+  res.render('newmember', { title: 'About',currentuser:currentuser, admin:admin,alluser:alluser,colorBlind});
+});
+
+
+
+app.get('/changepassword/:id', async (req, res) => {
+  try {
+    // Use await here to get the user document
+    let user = await Users.findById(req.params.id);
+
+    // Check if the user was found
+    if (!user) {
+        return res.status(404).send('User not found.');
+    }
+
+    const [currentUser, admin, allUsers] = await Promise.all([
+      Users.findOne({ currentuser: "true" }),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" })
+    ]);
+
+    // Now you can render the page and pass the user object
+    res.render('password', { title: 'Change Password', user: user, currentuser: currentUser, admin: admin, alluser: allUsers,colorBlind });
+  } catch (error) {
+      console.error('Error retrieving user:', error);
+      res.status(500).send('Server error.');
+  }
+});
 
 
 // for ejs files, we use render to update stuff
 app.get('/about', (req, res) => {
-  res.render('about', { title: 'About' });
+  res.render('about', { title: 'About',currentuser:currentuser, admin:admin,alluser:alluser,colorBlind });
 });
 
 app.get('/filter', (req, res) => {
-  res.render('filter', { title: 'About' });
+  res.render('filter', { title: 'About',currentuser:currentuser, admin:admin,alluser:alluser,colorBlind });
 });
+
+app.get('/datepage', (req, res) => {
+  res.render('date', { title: 'Date'});
+});
+
+
+app.post('/filteredcontribution', async (req, res) => {
+  try {
+    // Extract 'start' and 'end' from the body and convert to Date objects
+    const start = new Date(req.body.startdate);
+    const end = new Date(req.body.enddate);
+
+    // Retrieve the earliest start date from Sprints
+    const earliestSprint = await Sprints.find().sort('startdate').limit(1);
+    if (!earliestSprint || !earliestSprint[0]) {
+      return res.status(404).send('No sprints found.');
+    }
+    const subtractor = new Date(earliestSprint[0].startdate);
+
+    // Subtract the start and end dates from the subtractor to get startindex and endindex
+    const startindex = (start - subtractor)/(1000 * 60 * 60 * 24);
+    const endindex = (end - subtractor)/(1000 * 60 * 60 * 24);
+
+    // Fetch the required data
+    const [blogs, admin, members, currentUser, table] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" }),
+      Tables.findOne()
+    ]);
+
+    // Render the page with the calculated indices and the fetched data
+    res.render('avgcontribution', {
+      startindex,
+      endindex,
+      blogs,
+      admin,
+      members,
+      currentUser,
+      table,start,end,colorBlind
+    });
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).send('Server error.');
+  }
+});
+
+app.post('/changepassword/:id', async (req, res) => {
+  const userId = req.params.id;
+  const newPassword = req.body.password;
+
+  try {
+      let user = await Users.findById(userId);
+      console.log(user.username);
+      if (!user) {
+          return res.status(404).send('User not found.');
+      }
+
+      user.password = newPassword; // Here you'd ideally hash the password before saving
+      await user.save();
+
+      res.redirect('/members'); // Redirect after changing the password
+
+  } catch (error) {
+      console.error('Error updating password:', error);
+      res.status(500).send('Server error.');
+  }
+});
+
 
 
 app.post('/filteredindex', async (req, res) => {
@@ -272,7 +501,7 @@ app.post('/filteredindex', async (req, res) => {
     console.log(filteredBlogs);
 
     // Render the filteredindex.ejs template and pass the filtered Blogs
-    res.render('filteredindex', { blogs: filteredBlogs, title: 'Filtered Index', sortPriority, sortByDate, currentSort });
+    res.render('filteredindex', { blogs: filteredBlogs, title: 'Filtered Index', sortPriority, sortByDate, currentSort,currentuser:currentuser, admin:admin,alluser:alluser });
   } catch (error) {
     console.error('Error fetching filtered Blogs:', error);
     // Handle the error if needed
@@ -284,10 +513,48 @@ app.post('/filteredindex', async (req, res) => {
 
 
 
-// blog routes
-app.get('/blogs/create', (req, res) => {
-  res.render('create', { title: 'Create a new blog' });
+app.get('/blogs/create', async (req, res) => {
+  try {
+    const [currentUser, admin, allUsers] = await Promise.all([
+      Users.findOne({ currentuser: "true" }),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" })
+    ]);
+
+    res.render('create', { 
+      title: 'Create a new blog',
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: allUsers,colorBlind
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error.');
+  }
 });
+
+app.get('/loginpage', async (req, res) => {
+  try {
+    const [currentUser, admin, allUsers] = await Promise.all([
+      Users.findOne({ currentuser: "true" }),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" })
+    ]);
+
+    res.render('loginpage', { 
+      title: 'Log In',
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: allUsers ,colorBlind
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error.');
+  }
+});
+
+
+
 
 
 // app.route('/scrumboard/createSprint')
@@ -303,16 +570,28 @@ app.get('/blogs/create', (req, res) => {
 // })
 
 app.route('/scrumboard/createSprint')
-  .get((req, res) => {
-    // Fetch the entire Blog objects
-    Blog.find() // No need to specify fields, it fetches all fields by default
-      .then(blogTasks => {
-        res.render('createSprint', { title: 'Create a new sprint', blogTasks });
-      })
-      .catch(err => {
-        console.log(err);
+  .get(async (req, res) => {
+    try {
+      const [blogTasks, currentUser, admin, allUsers] = await Promise.all([
+        Blog.find(),
+        Users.findOne({ currentuser: "true" }),
+        Users.findOne({ admin: "true" }),
+        Users.find({ admin: "false" })
+      ]);
+
+      res.render('createSprint', { 
+        title: 'Create a new sprint', 
+        blogTasks: blogTasks,
+        currentuser: currentUser, 
+        admin: admin, 
+        alluser: allUsers,colorBlind 
       });
-  })
+    } catch (err) {
+      console.log(err);
+      res.status(500).send('Internal server error.');
+    }
+  });
+
 
 // app.route('/test/:id')
 //   .get((req, res) => {
@@ -343,107 +622,277 @@ app.route('/scrumboard/createSprint')
 
 // whenever /blogs has been called
 // we view all the blogs 
-app.get('/blogs', (req, res) => {
+app.get('/blogs', async (req, res) => {
+  try {
+    currentSort = false;
+    sortByDate = true;
 
-  currentSort = false
-  sortByDate = true
+    const [blogs, currentUser, admin, allUsers] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ currentuser: "true" }),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" })
+    ]);
 
-  Blog.find()
-    .then(result => {
-      res.render('index', { blogs: result, title: 'All blogs', sortPriority, sortByDate, currentSort });
-    })
-    .catch(err => {
-      console.log(err);
+    res.render('index', { 
+      blogs: blogs, 
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: allUsers,colorBlind 
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error.');
+  }
 });
+
+
+app.get('/members', async (req, res) => {
+  try {
+    const currentUser = await Users.findOne({ currentuser: "true" });
+
+      const [admin, members, blogs] = await Promise.all([
+        Users.findOne({ admin: "true" }),
+        Users.find({ admin: "false" }),
+        Blog.find()
+      ]);
+
+      res.render('adminmembers', { 
+        blogs: blogs, 
+        admin: admin,  // Admin user
+        members: members,  // Non-admin members
+        currentUser: currentUser, 
+        title: 'All blogs', colorBlind
+        //... (your other variables like sortPriority, sortByDate, currentSort)
+      });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
+app.get('/contribution', async (req, res) => {
+  try {
+    currentSort = false;
+    sortByDate = true;
+
+    const [blogs, admin, members, currentUser, table, earliestSprint] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" }),
+      Tables.findOne(),
+      Sprints.find().sort('startdate').limit(1),
+    ]);
+
+    const start = new Date(earliestSprint[0].startdate);
+
+    res.render('contribution', { 
+      blogs: blogs, 
+      admin: admin, 
+      members: members,
+      currentUser: currentUser,
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,colorBlind,table,start
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.get('/avgcontribution', async (req, res) => {
+  try {
+    currentSort = false;
+    sortByDate = true;
+
+    const [blogs, admin, members, currentUser, table, earliestSprint, latestSprint] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" }),
+      Tables.findOne(),
+      Sprints.find().sort('startdate').limit(1),
+      Sprints.find().sort('-enddate').limit(1)
+    ]);
+
+    // Extract dates and convert to JavaScript Date objects
+    const start = new Date(earliestSprint[0].startdate);
+    const end = new Date(latestSprint[0].enddate);
+    const startindex = 0;
+    const endindex = (end - start)/(1000 * 60 * 60 * 24)
+    console.log(startindex,endindex)
+
+    res.render('avgcontribution', { 
+      blogs: blogs, 
+      admin: admin, 
+      members: members,
+      currentUser: currentUser,
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,colorBlind,table,start,end,startindex,endindex
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 let sortByDate = true; // Initialize with -1 for descending order
 
 let currentSort = true
 
-app.get('/sort-by-date', (req, res) => {
-  // Toggle the sorting order between -1 and 1
-  const sortedByDate = 1;
-  currentSort = false
-  sortByDate = true;
+app.get('/sort-by-date', async (req, res) => {
+  try {
+    // Toggle the sorting order between -1 and 1
+    const sortedByDate = 1;
+    currentSort = false;
+    sortByDate = true;
 
-  Blog.find()
-    .sort({ createdAt: sortedByDate }) // Sort by 'createdAt' field
-    .then(result => {
-      res.render('index', { blogs: result, title: 'All blogs', sortPriority, sortByDate, currentSort });
+    const [blogs, admin, members, currentUser] = await Promise.all([
+      Blog.find().sort({ createdAt: sortedByDate }),  // Sort by 'createdAt' field
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
 
-    })
-    .catch(err => {
-      console.log(err);
+    res.render('index', { 
+      blogs: blogs, 
+      admin: admin, 
+      members: members,  // Assuming you want to include the non-admin members
+      currentuser: currentUser, 
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,
+      currentuser: currentUser, // Pass the current user with `currentuser: "true"`
+      alluser: members,colorBlind
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-app.get('/sort-by-date2', (req, res) => {
-  // Toggle the sorting order between -1 and 1
-  const sortedByDate = -1;
-  currentSort = false
-  sortByDate = false;
+app.get('/sort-by-date2', async (req, res) => {
+  try {
+    // Toggle the sorting order between -1 and 1
+    const sortedByDate = -1;
+    currentSort = false;
+    sortByDate = false;
 
-  Blog.find()
-    .sort({ createdAt: sortedByDate }) // Sort by 'createdAt' field
-    .then(result => {
-      res.render('index', { blogs: result, title: 'All blogs', sortPriority, sortByDate, currentSort });
+    const [blogs, admin, members, currentUser] = await Promise.all([
+      Blog.find().sort({ createdAt: sortedByDate }),  // Sort by 'createdAt' field
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
 
-    })
-    .catch(err => {
-      console.log(err);
+    res.render('index', { 
+      blogs: blogs, 
+      admin: admin, 
+      members: members,  // Assuming you want to include the non-admin members
+      currentuser: currentUser, 
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,
+      colorBlind,
+      currentuser: currentUser, // Pass the current user with `currentuser: "true"`
+      alluser: members  // Assuming `alluser` should be the non-admin members list
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 
 let sortPriority = true; // Initialize with -1 for descending order
 
-app.get('/sort', (req, res) => {
-  Blog.find()
-    .then(result => {
-      // Define the priority order
-      const priorityOrder = ['Low', 'Medium', 'Important', 'Urgent']
-      currentSort = true
+app.get('/sort', async (req, res) => {
+  try {
+    const [blogs, admin, members, currentUser] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
 
-      // Sort the result array based on the priority order
-      result.sort((a, b) => {
-        const priorityA = priorityOrder.indexOf(a.priority);
-        const priorityB = priorityOrder.indexOf(b.priority);
-        return priorityA - priorityB;
-      });
+    // Define the priority order
+    const priorityOrder = ['Low', 'Medium', 'Important', 'Urgent'];
+    currentSort = true;
 
-      // Toggle the sorting order between -1 and 1
-      sortPriority = true;
-
-      res.render('index', { blogs: result, title: 'All blogs', sortPriority, sortByDate, currentSort });
-    })
-    .catch(err => {
-      console.log(err);
+    // Sort the result array based on the priority order
+    blogs.sort((a, b) => {
+      const priorityA = priorityOrder.indexOf(a.priority);
+      const priorityB = priorityOrder.indexOf(b.priority);
+      return priorityA - priorityB;
     });
+
+    sortPriority = true;
+
+    res.render('index', { 
+      blogs: blogs, 
+      admin: admin, 
+      members: members,
+      currentuser: currentUser, 
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,colorBlind 
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-app.get('/sort2', (req, res) => {
-  Blog.find()
-    .then(result => {
-      // Define the priority order
-      const priorityOrder = ['Urgent', 'Important', 'Medium', 'Low'];
-      currentSort = true
+app.get('/sort2', async (req, res) => {
+  try {
+    const [blogs, admin, members, currentUser] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
 
-      // Sort the result array based on the priority order
-      result.sort((a, b) => {
-        const priorityA = priorityOrder.indexOf(a.priority);
-        const priorityB = priorityOrder.indexOf(b.priority);
-        return priorityA - priorityB;
-      });
+    // Define the priority order
+    const priorityOrder = ['Urgent', 'Important', 'Medium', 'Low'];
+    currentSort = true;
 
-      // Toggle the sorting order between -1 and 1
-      sortPriority = false;
-
-      res.render('index', { blogs: result, title: 'All blogs', sortPriority, sortByDate, currentSort });
-    })
-    .catch(err => {
-      console.log(err);
+    // Sort the result array based on the priority order
+    blogs.sort((a, b) => {
+      const priorityA = priorityOrder.indexOf(a.priority);
+      const priorityB = priorityOrder.indexOf(b.priority);
+      return priorityA - priorityB;
     });
+
+    sortPriority = false;
+
+    res.render('index', { 
+      blogs: blogs, 
+      admin: admin, 
+      members: members,
+      currentuser: currentUser, 
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,colorBlind
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 
@@ -463,8 +912,14 @@ app.get('/logging/:id', async (req, res) => {
   try {
     const blogTaskId = req.params.id; // Get the Blog task ID from the URL parameters
 
-    // Find the Blog task based on its ID
-    const task = await Blog.findById(blogTaskId); // Replace 'Blog' with your actual Blog model
+    // Parallelize the database calls for efficiency
+    const [task, sprint, admin, members, currentUser] = await Promise.all([
+      Blog.findById(blogTaskId),  // Find the Blog task based on its ID
+      Sprints.findOne({ tasks: blogTaskId }), // Find the Sprint that contains the Blog task
+      Users.findOne({ admin: "true" }), // Fetch the admin user
+      Users.find({ admin: "false" }), // Fetch the non-admin users
+      Users.findOne({ currentuser: "true" })  // Fetch the current user
+    ]);
 
     if (!task) {
       // Handle the case when the Blog task is not found
@@ -472,18 +927,26 @@ app.get('/logging/:id', async (req, res) => {
       return;
     }
 
-    // Find the Sprint that contains the Blog task
-    const sprint = await Sprints.findOne({ tasks: blogTaskId });
-
-    const tasks = sprint.tasks
     if (!sprint) {
       // Handle the case when the Sprint is not found
       res.status(404).send('Sprint not found for this task');
       return;
     }
 
+    const tasks = sprint.tasks;
+
     // Render the EJS file and pass the specific task, sprint, and other necessary data to it
-    res.render('logging', { Blog: Blog,tasks,task, sprint, title: "Logging" });
+    res.render('logging', { 
+      Blog: Blog,
+      tasks: tasks,
+      task: task, 
+      sprint: sprint, 
+      title: "Logging",
+      currentuser: currentUser,
+      admin: admin,
+      alluser: members,colorBlind
+    });
+
   } catch (error) {
     console.error('Error fetching data:', error);
     // Handle the error if needed
@@ -493,67 +956,122 @@ app.get('/logging/:id', async (req, res) => {
 
 app.post('/logging/:id', async (req, res) => {
   try {
-    const blogTaskId = req.params.id; // Get the Blog task ID from the URL parameters
+    const blogTaskId = req.params.id; 
     const { member, logdate, storypoint } = req.body;
 
-    // Find the Blog task based on its ID
-    const task = await Blog.findById(blogTaskId); // Replace 'Blog' with your actual Blog model
+    const allmembers = await Users.find();
+    const nonAdminUserCount = allmembers.length;
 
+    // Original Logic
+    const task = await Blog.findById(blogTaskId); 
     if (!task) {
-      // Handle the case when the Blog task is not found
       res.status(404).send('Blog task not found');
       return;
     }
+    console.log("TEST THE INPUTS");
+    console.log(member);
+    console.log(logdate);
+    console.log(storypoint);
 
-    // Determine which inner list to update based on the selected member
-    const memberIndex = parseInt(member);
+    const memberIndex = allmembers.findIndex(user => user.username === member);
     const sprint = await Sprints.findOne({ tasks: blogTaskId });
+    console.log("This is a member index and non admin user count");
+    console.log(memberIndex);
+    console.log(nonAdminUserCount);
+    console.log((task.hours).length);
 
-    if (!isNaN(memberIndex) && memberIndex >= 0 && memberIndex < 5) {
-      // Ensure memberIndex is a valid index
+    if (!isNaN(memberIndex) && memberIndex >= 0 && memberIndex < nonAdminUserCount) {
       const loggedHours = parseInt(storypoint);
-    
-      // Calculate the index based on the log date and sprint dates
       const startDate = new Date(sprint.startdate);
       const endDate = new Date(sprint.enddate);
       const logDate = new Date(logdate);
+      const differentdays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
-      // Check if the log date is within the sprint's start and end date
       if (logDate >= startDate && logDate <= endDate) {
-        // Calculate the index based on the difference in days
         const daysDifference = Math.floor((logDate - startDate) / (24 * 60 * 60 * 1000));
-        
-        // Ensure the index is within bounds
         if (daysDifference >= 0 && daysDifference < task.hours[memberIndex].length) {
-          // Increment the selected element of the inner list
-          task.hours[memberIndex][daysDifference] += loggedHours;
-
-          // Calculate the cumulative sum for each member's indices
-          for (let i = 0; i < task.hours[5].length; i++) {
-            task.hours[5][i] = task.hours.slice(0, 5).reduce((acc, innerArray) => acc + (innerArray[i] || 0), 0);
+          for (let i = daysDifference; i < differentdays; i++) {
+            task.hours[memberIndex][i] += loggedHours;
           }
 
-          // Save the updated task
-          await task.save();
+          const members = await Users.find({ admin: "false" });
+          
 
-          // Redirect back to the '/scrumboard/:id' route
-          res.redirect(`/scrumboard/${sprint._id}`); // Assuming 'sprint._id' contains the ID of the current sprint
+          for (let i = 0; i < task.hours[nonAdminUserCount-1].length; i++) {
+            console.log(task.hours[nonAdminUserCount-1])
+            task.hours[nonAdminUserCount-1][i] = task.hours.slice(0, nonAdminUserCount-1).reduce((acc, innerArray) => acc + (innerArray[i] || 0), 0);
+          }
+
+          await task.save();
+          res.redirect(`/scrumboard/${sprint._id}`);
         } else {
-          // Handle invalid date selection
           res.status(400).send('Invalid log date selection');
         }
       } else {
-        // Handle log date outside sprint's date range
         res.status(400).send('Log date is outside the sprint date range');
       }
     } else {
-      // Handle invalid member selection
       res.status(400).send('Invalid member selection');
     }
 
+    // New Logic
+    const earliestSprint = await Sprints.find().sort('startdate').limit(1);
+    if (!earliestSprint || !earliestSprint.length) {
+      console.error('No sprints found');
+      res.status(400).send('No sprints found');
+      return;
+    }
+    const earliestStartDate = new Date(earliestSprint[0].startdate);
+    console.log(`Earliest Start Date: ${earliestStartDate}`); // ADD THIS
+
+    const newlogDate = new Date(logdate);
+    const daysDifferenceFromEarliest = Math.ceil((newlogDate - earliestStartDate) / (1000 * 60 * 60 * 24))
+
+    const tableRecord = await Tables.findOne();
+    if (!tableRecord) {
+      console.error('Table record not found');
+      res.status(400).send('Table record not found');
+      return;
+    }
+
+    while (tableRecord.array.length < nonAdminUserCount) {
+      tableRecord.array.push([]);
+    }
+
+    console.log(`Day difference ${daysDifferenceFromEarliest}`); // ADD THIS
+
+
+    const targetInnerArray = tableRecord.array[memberIndex];
+    console.log(`Target array length ${targetInnerArray.length}`); // ADD THIS
+    for (let idx = 0; idx < tableRecord.array.length; idx++) {
+      const targetInnerArray = tableRecord.array[idx];
+      
+      while (targetInnerArray.length <= daysDifferenceFromEarliest) {
+          if (targetInnerArray.length === daysDifferenceFromEarliest) {
+              if (idx === memberIndex) {
+                  targetInnerArray.push(parseInt(storypoint));
+                  console.log("PUSHEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+              } else {
+                  targetInnerArray.push(0);
+                  console.log("PUSHEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+              }
+          } else {
+              targetInnerArray.push(0);
+              console.log("PUSHEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+          }
+      }
+
+      if (targetInnerArray.length > daysDifferenceFromEarliest && idx === memberIndex) {
+        targetInnerArray[daysDifferenceFromEarliest] += parseInt(storypoint);
+        console.log("INCREMENTEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+    }
+  }
+  
+
+    await tableRecord.save();
+
   } catch (error) {
     console.error('Error logging hours:', error);
-    // Handle the error if needed
     res.status(500).send('Internal server error');
   }
 });
@@ -572,94 +1090,174 @@ app.post('/logging/:id', async (req, res) => {
 // Then you must link the create sprint button in scrumboard page to redirect to createSprint
 // (which you must create as I mentioned above)
 
-app.get('/scrumboard/:id', (req, res) => {
-  const sprintId = req.params.id;
+app.get('/scrumboard/:id', async (req, res) => {
+  try {
+    const sprintId = req.params.id;
 
-  // Retrieve the Sprint by ID
-  Sprints.findById(sprintId)
-    .populate('tasks')
-    .then(sprint => {
-      if (!sprint) {
-        console.log('Sprint not found');
-        res.render('sprintdetail', { sprint: null, title: 'Sprint Details' });
-      } else {
-        const tasks = sprint.tasks;
+    const [sprint, admin, members, currentUser,allsprints] = await Promise.all([
+      Sprints.findById(sprintId).populate('tasks'),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" }),
+      Sprints.find()
+    ]);
 
-        // Loop through the tasks (blog objects) and set their visibility to false
-        tasks.forEach(task => {
-          // Assuming task is a Blog object, update its visibility property
-          task.visibility = false;
-        });
+    if (!sprint) {
+      console.log('Sprint not found');
+      res.render('sprintdetail', { sprint: null, title: 'Sprint Details', currentuser: currentUser, admin: admin, alluser: members });
+    } else {
+      const tasks = sprint.tasks;
+      tasks.forEach(task => {
+        task.visibility = false; // Update the visibility property
+      });
 
-        // Save the updated blog objects
-        Promise.all(tasks.map(task => task.save()))
-          .then(() => {
-            console.log('Visibility updated successfully.');
+      // Save the updated blog objects
+      await Promise.all(tasks.map(task => task.save()));
 
-            // Now render your view or perform other actions as needed
-            res.render('sprintdetail', { sprint, tasks, title: 'Sprint Details' });
-          })
-          .catch(error => {
-            console.error('Error updating visibility:', error);
-            // Handle errors here if needed
-          });
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
+      console.log('Visibility updated successfully.');
+      res.render('sprintdetail', { allsprints, sprint, tasks, title: 'Sprint Details', currentuser: currentUser, admin: admin, alluser: members,colorBlind });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
-app.get('/burndown/:id', (req, res) => {
-  const sprintId = req.params.id;
+app.get('/accountdetails', async (req, res) => {
+  try {
+    currentSort = false;
+    sortByDate = true;
 
-  // Retrieve the Sprint by ID
-  Sprints.findById(sprintId)
-    .populate('tasks')
-    .then(sprint => {
-      if (!sprint) {
-        console.log('Sprint not found');
-        res.render('burndown', { sprint: null, title: 'Burndown Chart', sprintId });
-      } else {
-        const tasks = sprint.tasks;
+    const [blogs, currentUser, admin, members] = await Promise.all([
+      Blog.find(),
+      Users.findOne({ currentuser: "true" }),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" })
+    ]);
 
-        // Loop through the tasks (blog objects) and set their visibility to false
-        tasks.forEach(task => {
-          // Assuming task is a Blog object, update its visibility property
-          task.visibility = false;
-        });
-
-        // Save the updated blog objects
-        Promise.all(tasks.map(task => task.save()))
-          .then(() => {
-            console.log('Visibility updated successfully.');
-
-            // Now render your view or perform other actions as needed
-            res.render('burndown', { sprint, tasks, title: 'Burndown Chart', sprintId });
-          })
-          .catch(error => {
-            console.error('Error updating visibility:', error);
-            // Handle errors here if needed
-          });
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
+    // console.log(currentUser.username);
+    res.render('accountdetails', { 
+      blogs: blogs, 
+      user: currentUser, 
+      admin: admin,
+      alluser: members,
+      title: 'All blogs', 
+      sortPriority, 
+      sortByDate, 
+      currentSort,colorBlind 
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
+
+
+
+app.get('/burndown/:id', async (req, res) => {
+  try {
+    const sprintId = req.params.id;
+
+    const [sprint, admin, members, currentUser] = await Promise.all([
+      Sprints.findById(sprintId).populate('tasks'),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
+
+    if (!sprint) {
+      console.log('Sprint not found');
+      res.render('burndown', { sprint: null, title: 'Burndown Chart', sprintId, currentuser: currentUser, admin: admin, alluser: members });
+      return;
+    }
+
+    const tasks = sprint.tasks;
+    tasks.forEach(task => {
+      task.visibility = false;  // Update the visibility property
+    });
+
+    await Promise.all(tasks.map(task => task.save()));  // Save the updated blog objects
+
+    console.log('Visibility updated successfully.');
+    res.render('burndown', { 
+      sprint: sprint, 
+      tasks: tasks, 
+      title: 'Burndown Chart', 
+      sprintId, 
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: members,colorBlind 
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+// app.get('/burndown/:id', (req, res) => {
+//   const sprintId = req.params.id;
+
+//   // Retrieve the Sprint by ID
+//   Sprints.findById(sprintId)
+//     .populate('tasks')
+//     .then(sprint => {
+//       if (!sprint) {
+//         console.log('Sprint not found');
+//         res.render('burndown', { sprint: null, title: 'Burndown Chart', sprintId,currentuser:currentuser, admin:admin,alluser:alluser });
+//       } else {
+//         const tasks = sprint.tasks;
+
+//         // Loop through the tasks (blog objects) and set their visibility to false
+//         tasks.forEach(task => {
+//           // Assuming task is a Blog object, update its visibility property
+//           task.visibility = false;
+//         });
+
+//         // Save the updated blog objects
+//         Promise.all(tasks.map(task => task.save()))
+//           .then(() => {
+//             console.log('Visibility updated successfully.');
+
+//             // Now render your view or perform other actions as needed
+//             res.render('burndown', { sprint, tasks, title: 'Burndown Chart', sprintId,currentuser:currentuser, admin:admin,alluser:alluser });
+//           })
+//           .catch(error => {
+//             console.error('Error updating visibility:', error);
+//             // Handle errors here if needed
+//           });
+//       }
+//     })
+//     .catch(error => {
+//       console.error('Error:', error);
+//     });
+// });
+
+
 
 
 app.route('/editsprint/:id')
   .get(async (req, res) => {
     try {
       const id = req.params.id;
-      const sprint = await Sprints.findById(id);
-      
-      // Fetch the entire Blog objects
-      const blogTasks = await Blog.find();
-      
+
+      const [sprint, blogTasks, admin, members, currentUser] = await Promise.all([
+        Sprints.findById(id),          // Fetch the sprint by ID
+        Blog.find(),                   // Fetch the entire Blog objects
+        Users.findOne({ admin: "true" }),  // Fetch the admin user
+        Users.find({ admin: "false" }),   // Fetch the non-admin users
+        Users.findOne({ currentuser: "true" }) // Fetch the current user
+      ]);
+
       if (sprint) {
-        res.render('editsprint', { sprint, title: 'Edit Sprint', blogTasks });
+        res.render('editsprint', { 
+          sprint: sprint, 
+          blogTasks: blogTasks, 
+          title: 'Edit Sprint',
+          currentuser: currentUser, 
+          admin: admin, 
+          alluser: members,colorBlind 
+        });
       } else {
         // Handle the case when the sprint is not found
         res.status(404).send('Sprint not found');
@@ -756,30 +1354,45 @@ app.route('/editsprint/:id')
 
 
 
-app.get('/scrumboard', (req, res) => {
-  sortStatusSprint = true
-  Sprints.find()
-    .then(result => {
+  app.get('/scrumboard', async (req, res) => {
+    try {
+      sortStatusSprint = true;
+  
+      const [sprints, admin, members, currentUser] = await Promise.all([
+        Sprints.find(),
+        Users.findOne({ admin: "true" }),
+        Users.find({ admin: "false" }),
+        Users.findOne({ currentuser: "true" })
+      ]);
+  
       // Define the status order for sprints
-      const statusOrderSprint = ['Not Started','In Progress', 'Completed'];
-
-      // Sort the result array based on the status order for sprints
-      result.sort((a, b) => {
-        const check1 = (new Date() > a.startdate & new Date() < a.enddate)? "In Progress" : (new Date() < a.startdate)? "Not Started" : "Completed"
-        const check2 = (new Date() > b.startdate & new Date() < b.enddate)? "In Progress" : (new Date() < b.startdate)? "Not Started" : "Completed"
+      const statusOrderSprint = ['Not Started', 'In Progress', 'Completed'];
+  
+      // Sort the sprints array based on the status order for sprints
+      sprints.sort((a, b) => {
+        const check1 = (new Date() > a.startdate && new Date() < a.enddate) ? "In Progress" : 
+                      (new Date() < a.startdate) ? "Not Started" : "Completed";
+        const check2 = (new Date() > b.startdate && new Date() < b.enddate) ? "In Progress" : 
+                      (new Date() < b.startdate) ? "Not Started" : "Completed";
         const statusA = statusOrderSprint.indexOf(check1);
         const statusB = statusOrderSprint.indexOf(check2);
         return statusA - statusB;
       });
-
-      // Toggle the sorting order between -1 and 1
-
-      res.render('scrumboard', { sprints: result, title: 'All sprints', sortStatusSprint});
-    })
-    .catch(err => {
+  
+      // Render the scrumboard view
+      res.render('scrumboard', { 
+        sprints: sprints, 
+        title: 'All sprints', 
+        sortStatusSprint,
+        currentuser: currentUser, 
+        admin: admin, 
+        alluser: members,colorBlind 
+      });
+    } catch (err) {
       console.log(err);
-    });
-});
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
 
 app.post('/scrumboard', async (req, res) => {
@@ -791,7 +1404,7 @@ app.post('/scrumboard', async (req, res) => {
   const numberOfDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
   // Create an array of zeros with a length equal to numberOfDays
-  const hoursArray = Array(numberOfDays+1).fill(0);
+  const hoursArray = Array(numberOfDays).fill(0);
 
   let totalStoryPoints = 0;
 
@@ -808,7 +1421,10 @@ for (const taskId of taskIds) {
   }
 }
 
-console.log('Total Story Points:', totalStoryPoints);
+// console.log('Total Story Points:', totalStoryPoints);
+const nonAdminUserCount = await Users.find();
+// console.log("The number of users are");
+console.log(nonAdminUserCount.length);
 
   // Create an array filled with the total sum of story points
   const burndownArray = Array(numberOfDays).fill(totalStoryPoints);
@@ -818,7 +1434,7 @@ console.log('Total Story Points:', totalStoryPoints);
     try {
       const task = await Blog.findById(taskId);
       if (task) {
-        task.hours = Array(6).fill([...hoursArray]); // Clone the hoursArray for each inner array
+        task.hours = Array((nonAdminUserCount.length)+1).fill([...hoursArray]); // Clone the hoursArray for each inner array
         task.burndown = [...burndownArray]; // Clone the burndownArray
         task.visibility = false;
         return task.save();
@@ -855,55 +1471,74 @@ console.log('Total Story Points:', totalStoryPoints);
 });
 
 
-app.get('/sortsprint', (req, res) => {
-  sortStatusSprint = true
-  Sprints.find()
-    .then(result => {
-      // Define the status order for sprints
-      const statusOrderSprint = ['Not Started','In Progress', 'Completed'];
+app.get('/sortsprint', async (req, res) => {
+  try {
+    sortStatusSprint = true;
 
-      // Sort the result array based on the status order for sprints
-      result.sort((a, b) => {
-        const check1 = (new Date() > a.startdate & new Date() < a.enddate)? "In Progress" : (new Date() < a.startdate)? "Not Started" : "Completed"
-        const check2 = (new Date() > b.startdate & new Date() < b.enddate)? "In Progress" : (new Date() < b.startdate)? "Not Started" : "Completed"
-        const statusA = statusOrderSprint.indexOf(check1);
-        const statusB = statusOrderSprint.indexOf(check2);
-        return statusA - statusB;
-      });
+    const [sprints, admin, members, currentUser] = await Promise.all([
+      Sprints.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
 
-      // Toggle the sorting order between -1 and 1
-
-      res.render('scrumboard', { sprints: result, title: 'All sprints', sortStatusSprint});
-    })
-    .catch(err => {
-      console.log(err);
+    const statusOrderSprint = ['Not Started', 'In Progress', 'Completed'];
+    sprints.sort((a, b) => {
+      const check1 = (new Date() > a.startdate & new Date() < a.enddate) ? "In Progress" : 
+                     (new Date() < a.startdate) ? "Not Started" : "Completed";
+      const check2 = (new Date() > b.startdate & new Date() < b.enddate) ? "In Progress" : 
+                     (new Date() < b.startdate) ? "Not Started" : "Completed";
+      return statusOrderSprint.indexOf(check1) - statusOrderSprint.indexOf(check2);
     });
+
+    res.render('scrumboard', { 
+      sprints: sprints, 
+      title: 'All sprints', 
+      sortStatusSprint,
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: members,colorBlind 
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
-app.get('/sortsprint2', (req, res) => {
-  sortStatusSprint = false
-  Sprints.find()
-    .then(result => {
-      // Define the status order for sprints
-      const statusOrderSprint = ['Completed', 'In Progress', 'Not Started'];
+app.get('/sortsprint2', async (req, res) => {
+  try {
+    sortStatusSprint = false;
 
-      // Sort the result array based on the status order for sprints
-      result.sort((a, b) => {
-        const check1 = (new Date() > a.startdate & new Date() < a.enddate)? "In Progress" : (new Date() < a.startdate)? "Not Started" : "Completed"
-        const check2 = (new Date() > b.startdate & new Date() < b.enddate)? "In Progress" : (new Date() < b.startdate)? "Not Started" : "Completed"
-        const statusA = statusOrderSprint.indexOf(check1);
-        const statusB = statusOrderSprint.indexOf(check2);
-        return statusA - statusB;
-      });
+    const [sprints, admin, members, currentUser] = await Promise.all([
+      Sprints.find(),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
 
-      // Toggle the sorting order between -1 and 1
-
-      res.render('scrumboard', { sprints: result, title: 'All sprints', sortStatusSprint});
-    })
-    .catch(err => {
-      console.log(err);
+    const statusOrderSprint = ['Completed', 'In Progress', 'Not Started'];
+    sprints.sort((a, b) => {
+      const check1 = (new Date() > a.startdate & new Date() < a.enddate) ? "In Progress" : 
+                     (new Date() < a.startdate) ? "Not Started" : "Completed";
+      const check2 = (new Date() > b.startdate & new Date() < b.enddate) ? "In Progress" : 
+                     (new Date() < b.startdate) ? "Not Started" : "Completed";
+      return statusOrderSprint.indexOf(check1) - statusOrderSprint.indexOf(check2);
     });
+
+    res.render('scrumboard', { 
+      sprints: sprints, 
+      title: 'All sprints', 
+      sortStatusSprint,
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: members,colorBlind 
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
+
 
 
 
@@ -919,27 +1554,52 @@ app.get('/sortsprint2', (req, res) => {
 // we can view the details, we do this by extracting the unique id of the dataset
 // if we were to view the details of task one, it would take us to localhost:3000/blogs/asdfasdfasdf
 // note that "asdfasdfasdf" is the id 
-app.get('/blogs/:id', (req, res) => {
+app.get('/blogs/:id', async (req, res) => {
   const id = req.params.id;
-  Blog.findById(id)
-    .then(result => {
-      res.render('details', { blog: result, title: 'Blog Details' });
-    })
-    .catch(err => {
-      console.log(err);
+  try {
+    const [blog, admin, members, currentUser] = await Promise.all([
+      Blog.findById(id),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
+
+    res.render('details', { 
+      blog: blog, 
+      title: 'Blog Details', 
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: members,colorBlind 
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
-app.get('/scrumboard/task/:id', (req, res) => {
+app.get('/scrumboard/task/:id', async (req, res) => {
   const id = req.params.id;
-  Blog.findById(id)
-    .then(result => {
-      res.render('sprinttask', { blog: result, title: 'Blog Details' });
-    })
-    .catch(err => {
-      console.log(err);
+  try {
+    const [blog, admin, members, currentUser] = await Promise.all([
+      Blog.findById(id),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
+
+    res.render('sprinttask', { 
+      blog: blog, 
+      title: 'Blog Details', 
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: members,colorBlind 
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
+
 
 
 // this is a bit more complicated, we are still deleting by their id
@@ -951,6 +1611,15 @@ app.delete('/blogs/:id', (req,res)=>{
   .then(result => {
     // we use this redirect in front end (s1)
     res.json({redirect: '/blogs'})
+  }).catch((err)=>console.log(err))
+})
+
+app.delete('/adminmembers/:id', (req,res)=>{
+  const id = req.params.id;
+  Users.findByIdAndDelete(id)
+  .then(result => {
+    // we use this redirect in front end (s1)
+    res.json({redirect: '/adminmembers'})
   }).catch((err)=>console.log(err))
 })
 
@@ -967,8 +1636,13 @@ app.get('/accumulation/:id', async (req, res) => {
   try {
     const blogTaskId = req.params.id; // Get the Blog task ID from the URL parameters
 
-    // Find the Blog task based on its ID
-    const task = await Blog.findById(blogTaskId); // Replace 'Blog' with your actual Blog model
+    const [task, sprint, admin, members, currentUser] = await Promise.all([
+      Blog.findById(blogTaskId),
+      Sprints.findOne({ tasks: blogTaskId }),
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Users.findOne({ currentuser: "true" })
+    ]);
 
     if (!task) {
       // Handle the case when the Blog task is not found
@@ -976,24 +1650,32 @@ app.get('/accumulation/:id', async (req, res) => {
       return;
     }
 
-    // Find the Sprint that contains the Blog task
-    const sprint = await Sprints.findOne({ tasks: blogTaskId });
-
-    const tasks = sprint.tasks
     if (!sprint) {
       // Handle the case when the Sprint is not found
       res.status(404).send('Sprint not found for this task');
       return;
     }
 
+    const tasks = sprint.tasks;
+
     // Render the EJS file and pass the specific task, sprint, and other necessary data to it
-    res.render('accumulation', { Blog: Blog,tasks,task, sprint, title: "Accumulation" });
+    res.render('accumulation', { 
+      Blog: Blog, 
+      tasks: tasks, 
+      task: task, 
+      sprint: sprint, 
+      title: "Accumulation",
+      currentuser: currentUser, 
+      admin: admin, 
+      alluser: members,colorBlind 
+    });
   } catch (error) {
     console.error('Error fetching data:', error);
     // Handle the error if needed
     res.status(500).send('Internal server error');
   }
 });
+
 
 // THIS BLOCK IS TO SHOW THE TASKS AGAIN WHEN SPRINT IS DELETED. IF USING THIS,
 // DELETE THE APP.DELETE BLOCK ABOVE

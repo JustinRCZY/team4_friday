@@ -29,10 +29,10 @@
   --not-started-2: rgba(255,226,221,255);
   --inprogress-1:rgba(112, 105, 17, 1); 
   --inprogress-2:rgba(253, 249, 200, 1);
-  --completed-1: rgba(42,69,54,255);
-  --completed-2: rgba(219,237,219,255);
+  --completed-1:rgba(42,69,54,255);
+  --completed-2:rgba(219,237,219,255);
   --low-1: rgba(42,69,54,255);
-  --low-2: rgba(219,237,219,255);
+  --low-2:rgba(219,237,219,255);
   --medium-1: rgba(112, 105, 17, 1);
   --medium-2: rgba(253, 249, 200, 1);
   --important-1: rgba(85,54,27,255);
@@ -491,10 +491,6 @@ body {
   align-items: center;
   border-radius: 4px;
 }
-.tableView .products-row:hover {
-  box-shadow: var(--filter-shadow);
-  background-color: var(--test);
-}
 .tableView .products-row .cell-more-button {
   display: none;
 }
@@ -683,7 +679,6 @@ body {
 .status.ux:before {
     background-color: var(--ux-1);
 }
-
 .gridView {
   display: flex;
   flex-wrap: wrap;
@@ -795,34 +790,18 @@ body {
               <span>Scrum Board</span>
             </a>
         </li>
-        <% if (allsprints.length > 0) { %>
-          <% allsprints.forEach(sprinter => { %>
-            <% if ((sprinter._id + "") == (sprint._id + "")) { %>
-              <li class="sidebar-list-item active">
-              <% } else { %>
-                <li class="sidebar-list-item">
-              <% } %>
-          <a href="/scrumboard/<%= sprinter._id %>"> &nbsp;&nbsp;&nbsp;&nbsp;
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span><%= sprinter.sprintname %></span>
+        <li class="sidebar-list-item active">
+          <a href="/members">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Team Members</span>
           </a>
-          </li>
-      <% }) %>
-      <% } %>
-
-          <li class="sidebar-list-item">
-            <a href="/members">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              <span>Team Members</span>
-            </a>
-        </li>
-
+      </li>
       </ul>
       <div class="account-info">
         <a href="/accountdetails"><div class="account-info-picture">
           <img src="https://static.thenounproject.com/png/3070444-200.png" alt="Account">
         </div></a>  
-        <a href="/accountdetails" style="text-decoration: none;"><div class="account-info-name"><%= currentuser.username %></div></a>
+        <a href="/accountdetails" style="text-decoration: none;"><div class="account-info-name"><%= user.username %></div></a>
         <button class="account-info-more">
           <a href="/loginpage"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
         </button>
@@ -830,313 +809,62 @@ body {
     </div>
     <div class="app-content">
       <div class="app-content-header">
-        <h1 class="app-content-headerText" style="font-size: 40px;">SPRINT BACKLOG - <%= sprint.sprintname %></h1>
-        <button class="mode-switch" title="Switch Theme">
+        <h1 class="app-content-headerText" style="font-size: 40px;"><%= user.username %></h1>
+        <button class="mode-switch" title="Colour Contrast Toggle">
           <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
             <defs></defs>
             <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
           </svg>
+        </button>
       </div>
-      <div class="app-content-actions">
-        <div class="app-content-actions-wrapper">
-        </div>
-      </div>
-      <div class="products-area-wrapper tableView">&nbsp;&nbsp;<a style="color: #fff;background-color: #a50000; padding-left: 5px; padding-right: 5px; border-radius: 8px;">Not Started</a></div>
+      <br><br>
       <div class="products-area-wrapper tableView">
-        <div class="products-header">
           <div class="product-cell image">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Task Names
-          </div>
-          <div class="product-cell sales">
-            Tags
-          </div>
-          <div class="product-cell status-cell">Priority&nbsp;
-            </div>
-          <div class="product-cell sales">
-            Story Point
-          </div>
-        </div>
-        <% if (tasks.length > 0) { %>
-            <% tasks.forEach(task => { %>
-                <% if (task.status == "Not Started") { %>
-        <div class="products-row">
-          <button class="cell-more-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-          </button>
-            <div class="product-cell image">
-            <a class="delete" data-doc="<%= task._id %>"><i class="fas fa-trash-alt"></i></a>
-            <span><a class="single" href="/scrumboard/task/<%= task._id %>" style="text-decoration: none;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= task.tasknames %></a></span>
-            </div>
-          <div class="product-cell status-cell">
-            <span class="cell-label">Status:</span>
-            <% task.tags.forEach(tag => { %>
-
-                <% if (tag == "Front end") { %>
-                    <scan class="status frontend"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Back end") { %>
-                    <scan class="status backend"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "API") { %>
-                    <scan class="status api"><%= tag %></scan>&nbsp;&nbsp;
-                <% } else if (tag == "Database") { %>
-                    <scan class="status database"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Framework") { %>
-                    <scan class="status framework"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Testing") { %>
-                    <scan class="status testing"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "UI") { %>
-                    <scan class="status ui"><%= tag %></scan>&nbsp;
-                <% } else { %>
-                    <scan class="status ux"><%= tag %></scan>&nbsp;
-                <% } %>
-                
-            <% }) %>
-          </div>
-          <div class="product-cell stock"><span class="cell-label">Stock:</span>
-            <% if (task.priority === "Urgent") { %>
-                <scan class="status urgent"><%= task.priority %></scan>
-            <% } else if (task.priority === "Important") { %>
-                <scan class="status important"><%= task.priority %></scan>
-            <% } else if (task.priority === "Medium") { %>
-                <scan class="status medium"><%= task.priority %></scan>
-            <% } else { %>
-                <scan class="status low"><%= task.priority %></scan>
-            <% } %>
-        </div>
-        <div class="product-cell stock"><span class="cell-label">Stock:</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= task.storypoint %>
-        </div>
-          <div>
-            <% if (new Date() < sprint.enddate) { %>
-              <a class="single" href="/edittask/<%= task._id %>"><i class="fas fa-edit"></i></a>
-              <a class="single" href="/logging/<%= task._id %>"><i class="fas fa-male"></i></a>
-          <% } else { %>
-              <a class="single"><i class="fas fa-edit" style="color: rgba(255, 255, 255, 0);"></i></a>
-              <a class="single"><i class="fas fa-male" style="color: rgba(255, 255, 255, 0);"></i></a>
-          <% } %>
-              <a class="single" href="/accumulation/<%= task._id %>"><i class="fas fa-chart-bar"></i></a>
-            </div>
-        </div>
-        <% } %>
-        <% }) %>
-    <% } else { %>
             <div class="products-row">
-                <button class="cell-more-button">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                </button>
-                  <div class="product-cell image" >
-                  <i class="fas fa-trash-alt" style="color: rgba(255, 255, 255, 0);"></i>
-                  <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;There are no tasks</span>
-                  </div>
-                <div class="product-cell status-cell">
-                  <span class="cell-label">Status:</span>
-                      <span class="cell-label"></span>
+                <div class="product-cell image" style="font-size: 20px;">
+                <span>Username</span>
                 </div>
-                <div class="product-cell stock"><span class="cell-label">Stock:</span></div>
-              </div>
-        <% } %>
-      </div>
-
-
-      <br><br><br>
-      <div class="products-area-wrapper tableView">&nbsp;&nbsp;<a style="color: #fff;background-color: #6b8300; padding-left: 5px; padding-right: 5px; border-radius: 8px;">In-Progress</a></div>
-      <div class="products-area-wrapper tableView">
-        <div class="products-header">
-          <div class="product-cell image">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Task Names
-          </div>
-          <div class="product-cell sales">
-            Tags
-          </div>
-          <div class="product-cell status-cell">Priority&nbsp;
-            <a class="single" href="/sortsprint"><i class="fas fa-arrow-down"></i></a>
-            <a class="single" href="/sortsprint2"><i class="fas fa-arrow-up"></i></a>
-            </div>
-          <div class="product-cell sales">
-            Story Point
-          </div>
-        </div>
-        <% if (tasks.length > 0) { %>
-            <% tasks.forEach(task => { %>
-                <% if (task.status == "In-Progress") { %>
-        <div class="products-row">
-          <button class="cell-more-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-          </button>
-            <div class="product-cell image">
-            <a class="delete" data-doc="<%= task._id %>"><i class="fas fa-trash-alt"></i></a>
-            <span><a class="single" href="/scrumboard/task/<%= task._id %>" style="text-decoration: none;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= task.tasknames %></a></span>
-            </div>
-          <div class="product-cell status-cell">
-            <span class="cell-label">Status:</span>
-            <% task.tags.forEach(tag => { %>
-
-                <% if (tag == "Front end") { %>
-                    <scan class="status frontend"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Back end") { %>
-                    <scan class="status backend"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "API") { %>
-                    <scan class="status api"><%= tag %></scan>&nbsp;&nbsp;
-                <% } else if (tag == "Database") { %>
-                    <scan class="status database"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Framework") { %>
-                    <scan class="status framework"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Testing") { %>
-                    <scan class="status testing"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "UI") { %>
-                    <scan class="status ui"><%= tag %></scan>&nbsp;
-                <% } else { %>
-                    <scan class="status ux"><%= tag %></scan>&nbsp;
-                <% } %>
-                
-            <% }) %>
-          </div>
-          <div class="product-cell stock"><span class="cell-label">Stock:</span>
-            <% if (task.priority === "Urgent") { %>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<scan class="status urgent"><%= task.priority %></scan>
-            <% } else if (task.priority === "Important") { %>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<scan class="status important"><%= task.priority %></scan>
-            <% } else if (task.priority === "Medium") { %>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<scan class="status medium"><%= task.priority %></scan>
-            <% } else { %>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<scan class="status low"><%= task.priority %></scan>
-            <% } %>
-        </div>
-        <div class="product-cell stock"><span class="cell-label">Stock:</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= task.storypoint %>
-        </div>
-          <div>
-            <% if (new Date() < sprint.enddate) { %>
-                <a class="single" href="/edittask/<%= task._id %>"><i class="fas fa-edit"></i></a>
-                <a class="single" href="/logging/<%= task._id %>"><i class="fas fa-male"></i></a>
-            <% } else { %>
-                <a class="single"><i class="fas fa-edit" style="color: rgba(255, 255, 255, 0);"></i></a>
-                <a class="single"><i class="fas fa-male" style="color: rgba(255, 255, 255, 0);"></i></a>
-            <% } %>
-                <a class="single" href="/accumulation/<%= task._id %>"><i class="fas fa-chart-bar"></i></a>
-
-
-            </div>
-        </div>
-        <% } %>
-        <% }) %>
-    <% } else { %>
-            <div class="products-row">
-                <button class="cell-more-button">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                </button>
-                  <div class="product-cell image" >
-                  <i class="fas fa-trash-alt" style="color: rgba(255, 255, 255, 0);"></i>
-                  <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;There are no tasks</span>
-                  </div>
-                <div class="product-cell status-cell">
-                  <span class="cell-label">Status:</span>
-                      <span class="cell-label"></span>
+                <div class="product-cell image" style="font-size: 20px;">
+                <span>:</span>
                 </div>
-                <div class="product-cell stock"><span class="cell-label">Stock:</span></div>
-              </div>
-        <% } %>
-      </div>
-
-
-
-      <br><br><br>
-      <div class="products-area-wrapper tableView">&nbsp;&nbsp;<a style="color: #fff;background-color: #008311; padding-left: 5px; padding-right: 5px; border-radius: 8px;">Completed</a></div>
-      <div class="products-area-wrapper tableView">
-        <div class="products-header">
-          <div class="product-cell image">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Task Names
-          </div>
-          <div class="product-cell sales">
-            Tags
-          </div>
-          <div class="product-cell status-cell">Priority&nbsp;
-            <a class="single" href="/sortsprint"><i class="fas fa-arrow-down"></i></a>
-            <a class="single" href="/sortsprint2"><i class="fas fa-arrow-up"></i></a>
-            </div>
-          <div class="product-cell sales">
-            Story Point
-          </div>
-        </div>
-        <% if (tasks.length > 0) { %>
-            <% tasks.forEach(task => { %>
-                <% if (task.status == "Completed") { %>
-        <div class="products-row">
-          <button class="cell-more-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-          </button>
-            <div class="product-cell image">
-            <a class="delete" data-doc="<%= task._id %>"><i class="fas fa-trash-alt"></i></a>
-            <span><a class="single" href="/scrumboard/task/<%= task._id %>" style="text-decoration: none;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= task.tasknames %></a></span>
-            </div>
-          <div class="product-cell status-cell">
-            <span class="cell-label">Status:</span>
-            <% task.tags.forEach(tag => { %>
-
-                <% if (tag == "Front end") { %>
-                    <scan class="status frontend"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Back end") { %>
-                    <scan class="status backend"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "API") { %>
-                    <scan class="status api"><%= tag %></scan>&nbsp;&nbsp;
-                <% } else if (tag == "Database") { %>
-                    <scan class="status database"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Framework") { %>
-                    <scan class="status framework"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "Testing") { %>
-                    <scan class="status testing"><%= tag %></scan>&nbsp;
-                <% } else if (tag == "UI") { %>
-                    <scan class="status ui"><%= tag %></scan>&nbsp;
-                <% } else { %>
-                    <scan class="status ux"><%= tag %></scan>&nbsp;
-                <% } %>
-                
-            <% }) %>
-          </div>
-          <div class="product-cell stock"><span class="cell-label">Stock:</span>
-            <% if (task.priority === "Urgent") { %>
-                <scan class="status urgent"><%= task.priority %></scan>
-            <% } else if (task.priority === "Important") { %>
-                <scan class="status important"><%= task.priority %></scan>
-            <% } else if (task.priority === "Medium") { %>
-                <scan class="status medium"><%= task.priority %></scan>
-            <% } else { %>
-                <scan class="status low"><%= task.priority %></scan>
-            <% } %>
-        </div>
-        <div class="product-cell stock"><span class="cell-label">Stock:</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= task.storypoint %>
-        </div>
-          <div>
-            <% if (new Date() < sprint.enddate) { %>
-              <a class="single" href="/edittask/<%= task._id %>"><i class="fas fa-edit"></i></a>
-              <a class="single" href="/logging/<%= task._id %>"><i class="fas fa-male"></i></a>
-          <% } else { %>
-              <a class="single"><i class="fas fa-edit" style="color: rgba(255, 255, 255, 0);"></i></a>
-              <a class="single"><i class="fas fa-male" style="color: rgba(255, 255, 255, 0);"></i></a>
-          <% } %>
-              <a class="single" href="/accumulation/<%= task._id %>"><i class="fas fa-chart-bar"></i></a>
-            </div>
-        </div>
-        <% } %>
-        <% }) %>
-    <% } else { %>
-            <div class="products-row">
-                <button class="cell-more-button">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                </button>
-                  <div class="product-cell image" >
-                  <i class="fas fa-trash-alt" style="color: rgba(255, 255, 255, 0);"></i>
-                  <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;There are no tasks</span>
-                  </div>
-                <div class="product-cell status-cell">
-                  <span class="cell-label">Status:</span>
-                      <span class="cell-label"></span>
+                <div class="product-cell image" style="font-size: 20px;">
+                  <span><%= user.username %></span>
                 </div>
-                <div class="product-cell stock"><span class="cell-label">Stock:</span></div>
+                <div class="product-cell image" style="font-size: 20px;">
+                  <span></span>
+                  </div>
               </div>
-        <% } %>
-      </div>
+              <div class="products-row">
+                <div class="product-cell image" style="font-size: 20px;">
+                <span>E-mail</span>
+                </div>
+                <div class="product-cell image" style="font-size: 20px;">
+                <span>:</span>
+                </div>
+                <div class="product-cell image" style="font-size: 20px;">
+                  <span><%= user.email %></span>
+                </div>
+                <div class="product-cell image" style="font-size: 20px;">
+                  <span></span>
+                  </div>
+              </div>
+              <div class="products-row">
+                <div class="product-cell image" style="font-size: 20px;">
+                <span>Password</span>
+                </div>
+                <div class="product-cell image" style="font-size: 20px;">
+                <span>:</span>
+                </div>
+                <div class="product-cell image" style="font-size: 20px;">
+                  <span><%= user.password %></span>
+                </div>
+                <div class="product-cell image" style="font-size: 20px;">
+                  <span></span>
+                  </div>
+              </div>
+        </div>
     </div>
+    <button class="app-content-headerButton" data-href="/changepassword/<%= user.id %>" style="max-width: fit-content;margin-left: 3%;">Change Password</button>
 
     
   </div>
@@ -1172,14 +900,14 @@ body {
                 method: 'DELETE',
             })
             .then(response => response.json())
-            .then(data => window.location.href = `/scrumboard/<%= sprint._id %>`)
+            .then(data => window.location.href = data.redirect)
             .catch(err => console.log(err));
         });
     });
     
 </script>
 
-    <script>
+<script>
     // JavaScript to handle button clicks and navigate to the specified URLs
     var buttons = document.getElementsByClassName('app-content-headerButton');
     var buttons2 = document.getElementsByClassName('action-button filter jsFilter')

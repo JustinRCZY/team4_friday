@@ -1,4 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap");
+<html lang="en">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<body>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap");
 a, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {
   margin: 0;
   padding: 0;
@@ -748,3 +754,399 @@ details summary::marker {
 details summary::-webkit-details-marker {
   display: none;
 }
+
+</style>
+
+<style>
+  .select-container {
+      display: flex;
+      justify-content: left;
+      position: relative;
+      min-width: 100px;
+      height: 50px;
+    }
+
+    .select-box {
+      border: none;
+      appearance: none;
+      padding: 0 30px 0 15px;
+      width: 80%;
+      color: rgb(48, 48, 48);
+      background-color: rgb(243, 243, 243);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .checkbox-group {
+      display: inline-block;
+      flex-direction: row;
+      gap: 10px; /* Adjust the gap between checkboxes as needed */
+    }
+    
+    .checkbox-group label {
+        display: inline-block;
+        align-items: left;
+        margin-right:8%;
+    }
+
+    .checkdesign {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      max-width: 100px;
+      width: 80%;
+      color: rgb(0, 0, 0);
+      background-color: rgb(245, 236, 255);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .checkbox {
+      display: inline-block;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .checkbox__input {
+      display: none;
+    }
+
+    .urgent {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgba(115,50,48,255);
+      background-color: rgba(255,226,221,255);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    
+    .important {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgba(85,54,27,255);
+      background-color: rgba(248, 219, 180, 1);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .medium {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgba(112, 105, 17, 1);
+      background-color: rgba(253, 249, 200, 1);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+
+    .low {
+      border: none;
+      appearance: none;
+      padding: 0 15px 0 15px;
+      width: 80%;
+      color: rgba(42,69,54,255);
+      background-color: rgba(219,237,219,255);
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    .create-blog button{
+      margin-top: 20px;
+      background: rgb(92, 130, 255);
+      color: white;
+      padding: 6px;
+      border: 0;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+    
+    .create-blog button{
+      margin-top: 20px;
+      background: rgb(92, 130, 255);
+      color: white;
+      padding: 6px;
+      border: 0;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+</style>
+
+<style>
+  :root {
+  --app-bg: #fff;
+  --sidebar: #e1e4eb;
+  --sidebar-main-color: #1f1c2e;
+  --table-border: #1a2131;
+  --table-header: #1a2131;
+  --app-content-secondary-color: #f3f6fd;
+  --app-content-main-color: #1f1c2e;
+  --sidebar-link: #1f1c2e;
+  --sidebar-hover-link: rgba(255, 255, 255, 0.5);
+  --sidebar-active-link: rgba(195, 207, 244, 1);
+  --action-color: #2869ff;
+  --action-color-hover: #6291fd;
+  --filter-reset: #2c394f;
+  --filter-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  --test: rgb(212, 212, 212);
+  --not-started-1: rgba(115,50,48,255);
+  --not-started-2: rgba(255,226,221,255);
+  --inprogress-1:rgba(112, 105, 17, 1); 
+  --inprogress-2:rgba(253, 249, 200, 1);
+  --completed-1:rgba(42,69,54,255);
+  --completed-2:rgba(219,237,219,255);
+  --low-1: rgba(42,69,54,255);
+  --low-2:rgba(219,237,219,255);
+  --medium-1: rgba(112, 105, 17, 1);
+  --medium-2: rgba(253, 249, 200, 1);
+  --important-1: rgba(85,54,27,255);
+  --important-2:rgba(248, 219, 180, 1);
+  --urgent-1: rgba(115,50,48,255);
+  --urgent-2: rgba(255,226,221,255);
+  --fe-1: rgba(102,78,118,255);
+  --fe-2: rgba(232,222,238,255);
+  --be-1: rgba(79,103,121,255);
+  --be-2: rgba(211,229,239,255);
+  --api-1: rgba(91,89,87,255);
+  --api-2: rgba(241,240,239,255);
+  --db-1: rgba(75,73,69,255);
+  --db-2: rgba(227,226,224,255);
+  --frame-1: rgba(150,95,92,255);
+  --frame-2:rgba(255,226,221,255);
+  --testing-1: rgba(131,96,112,255);
+  --testing-2: rgba(245,224,233,255);
+  --ui-1: rgba(128,97,72,255);
+  --ui-2: rgba(245,217,196,255);
+  --ux-1: rgba(130,108,98,255);
+  --ux-2: rgba(238,224,218,255);
+}
+
+.light:root {
+  --app-bg: #fff;
+  --sidebar: #3471ff;
+  --app-content-secondary-color: #d9ff00;
+  --app-content-main-color: #1f1c2e;
+  --sidebar-link: #ffffff;
+  --sidebar-hover-link: rgba(255, 255, 255, 0.5);
+  --sidebar-active-link: rgba(195, 207, 244, 1);
+  --sidebar-main-color: #1f1c2e;
+  --filter-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  --not-started-2: rgba(202,53,33,255);
+  --not-started-1: rgba(255,255,255,255);
+  --inprogress-2: rgba(248,230,160,255); 
+  --inprogress-1:rgba(83,63,4,255);
+  --completed-2: rgba(91,127,36,255);
+  --completed-1: rgba(254,254,253,255);
+  --low-1: rgba(211,241,167,255);
+  --low-2:rgba(55,71,31,255);
+  --medium-1: rgba(248,230,160,255);
+  --medium-2: rgba(83,63,4,255);
+  --important-1: rgba(250,165,61,255);
+  --important-2:rgba(95,56,17,255);
+  --urgent-2: rgba(202,53,33,255);
+  --urgent-1: rgba(255,255,255,255);
+  --fe-2: rgba(110,93,198,255);
+  --fe-1: rgba(234,231,247,255);
+  --be-2: rgba(174,71,135,255);
+  --be-1: rgba(255,255,255,255);
+  --api-2: rgba(31,132,90,255);
+  --api-1: rgba(255,255,255,255);
+  --db-2: rgba(12,102,228,255);
+  --db-1: rgba(255,255,255,255);
+  --frame-2: rgba(98,111,134,255);
+  --frame-1:rgba(255,255,255,255);
+  --testing-2: rgba(186,243,219,255);
+  --testing-1: rgba(22,75,53,255);
+  --ui-2: rgba(223,216,253,255);
+  --ui-1: rgba(53,44,99,255);
+  --ux-1: rgba(255,255,255,255);
+  --ux-2: rgba(96,198,210,255);
+}
+  .status {
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.status:before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.status.notstarted {
+    color: var(--not-started-1);
+    background-color: var(--not-started-2);
+}
+.status.notstarted:before {
+    background-color: var(--not-started-1);
+}
+.status.inprogress {
+    color: var(--inprogress-1);
+    background-color: var(--inprogress-2);
+}
+.status.inprogress:before {
+    background-color: var(--inprogress-1);
+}
+.status.completed {
+    color: var(--completed-1);
+    background-color: var(--completed-2);
+}
+.status.completed:before {
+    background-color: var(--completed-1);
+}
+
+.status.low {
+    color: var(--low-1);
+    background-color: var(--low-2);
+}
+.status.low:before {
+    background-color: var(--low-1);
+}
+.status.medium {
+    color: var(--medium-1);
+    background-color: var(--medium-2);
+}
+.status.medium:before {
+    background-color: var(--medium-1);
+}
+.status.important {
+    color: var(--important-1);
+    background-color: var(--important-2);
+}
+.status.important:before {
+    background-color: var(--important-1);
+}
+.status.urgent {
+    color: var(--urgent-1);
+    background-color: var(--urgent-2);
+}
+.status.urgent:before {
+    background-color: var(--urgent-1);
+}
+.status.frontend {
+    color: var(--fe-1);
+    background-color: var(--fe-2);
+}
+.status.frontend:before {
+    background-color: var(--fe-1);
+}
+.status.backend {
+    color: var(--be-1);
+    background-color: var(--be-2);
+}
+.status.backend:before {
+    background-color: var(--be-1);
+}
+.status.api {
+    color: var(--api-1);
+    background-color: var(--api-2);
+}
+.status.api:before {
+    background-color: var(--api-1);
+}
+.status.database {
+    color: var(--db-1);
+    background-color: var(--db-2);
+}
+.status.database:before {
+    background-color: var(--db-1);
+}
+.status.framework {
+    color: var(--frame-1);
+    background-color: var(--frame-2);
+}
+.status.framework:before {
+    background-color: var(--frame-1);
+}
+.status.testing {
+    color: var(--testing-1);
+    background-color: var(--testing-2);
+}
+.status.testing:before {
+    background-color: var(--testing-1);
+}
+.status.ui {
+    color: var(--ui-1);
+    background-color: var(--ui-2);
+}
+.status.ui:before {
+    background-color: var(--ui-1);
+}
+.status.ux {
+    color: var(--ux-1);
+    background-color: var(--ux-2);
+}
+.status.ux:before {
+    background-color: var(--ux-1);
+}
+</style>
+
+<div class="demo-page">
+  <main class="demo-page-content">
+    <form id="myForm" action="/filteredcontribution" method="POST">
+    <section>
+      <div class="href-target" id="input-types"></div>
+      <h1>
+        Filter
+      </h1>
+
+      <div class="nice-form-group">
+        <label>Dates:</label>
+        <input type="date" name="startdate" max="" id="startdate" required> &nbsp;&nbsp;&nbsp;
+        <input type="date" name="enddate" min="" id="enddate" required>
+      </div>
+
+      <br>
+      <div class="create-blog">
+        <button>Submit</button>
+        <button style="margin-top: 20px;text-decoration: none; background: red;color: white;padding: 6px;border: 0;font-size: 1.2em; cursor: pointer; margin-left: 20px;"><a href="/blogs" style="margin-top: 20px;background: red;color: white;padding: 6px;border: 0;font-size: 1em; cursor: pointer;text-decoration: none;">Clear</a></button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    });
+  </script>
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    var currentDate = new Date().toISOString().split('T')[0];
+
+    // Set the minimum date for startdate to the current date
+    $('#startdate').prop('min', currentDate);
+    $('#enddate').prop('min', currentDate);
+
+    var startdate;
+    $('#startdate').on('change', function() {
+      startdate = $(this).val();
+      $('#enddate').prop('min', function() {
+        return startdate;
+      });
+    });
+
+    var enddate;
+    $('#enddate').on('change', function() {
+      enddate = $(this).val();
+      $('#startdate').prop('max', function() {
+        return enddate;
+      });
+    });
+  });
+</script>
+
+
+
+</body>
+</html>

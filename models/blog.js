@@ -45,7 +45,7 @@ const blogSchema = new Schema({
         default: true
     },
     hours:{
-        type:[[],[],[],[],[],[]],
+        type:[Array],
         required:false
     }
 }, {timestamps: true})
