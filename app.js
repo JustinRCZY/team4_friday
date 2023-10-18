@@ -535,7 +535,7 @@ app.post('/filteredindex', async (req, res) => {
     console.log(filteredBlogs);
 
     // Render the filteredindex.ejs template and pass the filtered Blogs
-    res.render('filteredindex', { blogs: filteredBlogs, title: 'Filtered Index', sortPriority, sortByDate, currentSort,currentuser:currentuser, admin:admin,alluser:alluser });
+    res.render('filteredindex', { blogs: filteredBlogs, title: 'Filtered Index', sortPriority, sortByDate, currentSort,currentuser:currentuser, admin:admin,alluser:alluser,colorBlind });
   } catch (error) {
     console.error('Error fetching filtered Blogs:', error);
     // Handle the error if needed
@@ -689,20 +689,45 @@ app.get('/members', async (req, res) => {
   try {
     const currentUser = await Users.findOne({ currentuser: "true" });
 
-      const [admin, members, blogs] = await Promise.all([
-        Users.findOne({ admin: "true" }),
-        Users.find({ admin: "false" }),
-        Blog.find()
-      ]);
+    const [admin, members, blogs, totalUsers, tables] = await Promise.all([
+      Users.findOne({ admin: "true" }),
+      Users.find({ admin: "false" }),
+      Blog.find(),
+      Users.find(), // This is for getting all users
+      Tables.findOne() // Assuming there's one Tables object in the DB
+    ]);
 
-      res.render('adminmembers', { 
-        blogs: blogs, 
-        admin: admin,  // Admin user
-        members: members,  // Non-admin members
-        currentUser: currentUser, 
-        title: 'All blogs', colorBlind
-        //... (your other variables like sortPriority, sortByDate, currentSort)
-      });
+    // Check the number of total users and Tables.array.length
+    const numberOfUsers = totalUsers.length;
+    const numberOfInnerArrays = tables ? tables.array.length : 0;
+
+    // Get the earliest start date and the latest end date
+    const earliestSprint = await Sprints.findOne().sort('startdate').limit(1);
+    const earliestStartDate = new Date(earliestSprint.startdate);
+
+    const latestSprint = await Sprints.findOne().sort('-enddate').limit(1);
+    const latestEndDate = new Date(latestSprint.enddate);
+
+    // Calculate the difference between these two dates.
+    const numberOfDaysToAdd = Math.ceil((latestEndDate - earliestStartDate) / (1000 * 60 * 60 * 24));
+
+    // Check if the Tables.array.length is less than the number of users
+    if (numberOfInnerArrays < numberOfUsers && tables) {
+      for (let i = numberOfInnerArrays; i < numberOfUsers; i++) {
+        const zerosArray = Array(numberOfDaysToAdd).fill(0);
+        tables.array.push(zerosArray);
+      }
+      await tables.save(); // Save the modified tables object
+    }
+
+    res.render('adminmembers', { 
+      blogs: blogs, 
+      admin: admin,
+      members: members,
+      currentUser: currentUser, 
+      title: 'All blogs', colorBlind
+      //... (your other variables like sortPriority, sortByDate, currentSort)
+    });
   } catch (err) {
     console.log(err);
     res.status(500).send("Internal Server Error");
@@ -1784,14 +1809,37 @@ app.delete('/blogs/:id', (req,res)=>{
   }).catch((err)=>console.log(err))
 })
 
-app.delete('/adminmembers/:id', (req,res)=>{
+app.delete('/adminmembers/:id', async (req, res) => {
   const id = req.params.id;
-  Users.findByIdAndDelete(id)
-  .then(result => {
-    // we use this redirect in front end (s1)
-    res.json({redirect: '/adminmembers'})
-  }).catch((err)=>console.log(err))
-})
+
+  try {
+    // Fetch all users to find the index of the user to delete
+    const allUsers = await Users.find();
+
+    // Find the index based on the provided ID
+    const memberIndex = allUsers.findIndex(user => user._id.toString() === id);
+
+    // Ensure the user exists before proceeding
+    if (memberIndex !== -1) {
+      // Fetch the Tables document and remove the corresponding inner array
+      const tables = await Tables.findOne();
+      if (tables && tables.array) {
+        tables.array.splice(memberIndex, 1); // Remove the inner array at the found index
+        await tables.save(); // Save the updated Tables document
+      }
+
+      // Delete the user object
+      await Users.findByIdAndDelete(id);
+      res.json({ redirect: '/adminmembers' });
+    } else {
+      // User not found
+      res.status(404).send('User not found');
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 app.delete('/scrumboard/:id', (req,res)=>{
   const id = req.params.id;
