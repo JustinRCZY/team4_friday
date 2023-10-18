@@ -1055,10 +1055,11 @@ app.post('/logging/:id', async (req, res) => {
 
           const members = await Users.find({ admin: "false" });
           
+          const lastArrayIndex = task.hours.length - 1;
 
-          for (let i = 0; i < task.hours[nonAdminUserCount-1].length; i++) {
-            console.log(task.hours[nonAdminUserCount-1])
-            task.hours[nonAdminUserCount-1][i] = task.hours.slice(0, nonAdminUserCount-1).reduce((acc, innerArray) => acc + (innerArray[i] || 0), 0);
+          for (let i = 0; i < task.hours[lastArrayIndex].length; i++) {
+            console.log(task.hours[lastArrayIndex])
+            task.hours[lastArrayIndex][i] = task.hours.slice(0, lastArrayIndex).reduce((acc, innerArray) => acc + (innerArray[i] || 0), 0);
           }
 
           await task.save();
@@ -1821,6 +1822,23 @@ app.delete('/adminmembers/:id', async (req, res) => {
 
     // Ensure the user exists before proceeding
     if (memberIndex !== -1) {
+      
+      // Remove the corresponding inner array from each blog's hours property
+      const allBlogs = await Blog.find();
+      for (let blog of allBlogs) {
+        if (blog.hours && Array.isArray(blog.hours) && blog.hours.length > memberIndex) {
+          blog.hours.splice(memberIndex, 1); // Remove the inner array at the found index
+
+          // Recalculate the cumulative sum for the last inner array
+          const lastArrayIndex = blog.hours.length - 1;
+          for (let i = 0; i < blog.hours[lastArrayIndex].length; i++) {
+            blog.hours[lastArrayIndex][i] = blog.hours.slice(0, lastArrayIndex).reduce((acc, innerArray) => acc + (innerArray[i] || 0), 0);
+          }
+
+          await blog.save(); // Save the modified blog
+        }
+      }
+
       // Fetch the Tables document and remove the corresponding inner array
       const tables = await Tables.findOne();
       if (tables && tables.array) {
