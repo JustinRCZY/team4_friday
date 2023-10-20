@@ -199,7 +199,7 @@ app.post('/loginpage', async (req, res) => {
       console.log("User is found");
 
       // Set all users' currentuser property to false
-      await Users.updateMany({}, { currentuser: "false" });
+      // await Users.updateMany({}, { currentuser: "false" });
 
       // Now, set the currentuser property of this user to true
       user.currentuser = "true";
@@ -371,7 +371,8 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/loginpage', (req, res) => {
+app.get('/loginpage', async (req, res) => {
+  await Users.updateMany({}, { currentuser: "false" });
   res.render('loginpage', { title: 'About',colorBlind });
 });
 
