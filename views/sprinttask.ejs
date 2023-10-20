@@ -1825,7 +1825,7 @@ opacity: 0.6;
                 </div>
                 <div class="product-cell image" style="font-size: 20px;">
                 <span>
-                  <%= blog.hours[blog.hours.length-1].reduce((total, currentValue) => total + currentValue, 0) %>
+                  <%= blog.hours[blog.hours.length-1][blog.hours[blog.hours.length-1].length - 1] %>
                 </span>
                 </div>
                 <div class="product-cell image" style="font-size: 20px;">
